@@ -16,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -43,11 +45,14 @@ public class AuthService {
         if (!passwordDto.equals(registerRequest.getConfirmPassword())){
             return "Password and Confirm Password must be the same!.";
         }
-        Role userRole = roleRepository.findByName("ROLE_USER");
+        Optional<Role> roleOptional = roleRepository.findByName("ROLE_USER");
+        if (roleOptional.isEmpty()){
+            return "Role not found!.";
+        }
         User user = User.builder()
                 .email(emailDto)
                 .password(passwordEncoder.encode(passwordDto))
-                .role(userRole)
+                .role(roleOptional.get())
                 .build();
         userRepository.save(user);
         return "User registered successfully!.";
