@@ -1,6 +1,6 @@
 package com.ptit.coffee_shop.model;
 
-import com.ptit.coffee_shop.common.enums.UserStatusEnum;
+import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,7 +48,7 @@ public class User implements UserDetails {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private UserStatusEnum status;
+    private Status status;
 
     @Column(name = "profile_img")
     private String profile_img;
@@ -75,6 +75,6 @@ public class User implements UserDetails {
     }
 
     public boolean isEnabled() {
-        return status.equals(UserStatusEnum.ACTIVE);
+        return status.equals(Status.ACTIVE);
     }
 }

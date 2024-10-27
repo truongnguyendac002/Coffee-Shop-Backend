@@ -1,7 +1,7 @@
 package com.ptit.coffee_shop.config;
 
 import com.ptit.coffee_shop.common.Constant;
-import com.ptit.coffee_shop.common.enums.UserStatusEnum;
+import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.Role;
 import com.ptit.coffee_shop.model.User;
@@ -10,7 +10,6 @@ import com.ptit.coffee_shop.common.enums.RoleEnum;
 import com.ptit.coffee_shop.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +45,7 @@ public class DataInitializer implements CommandLineRunner {
             Role role = roleRepository.getRoleByName(RoleEnum.ROLE_ADMIN)
                     .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"DataInitializer.run"}, "Role Admin not found"));
             admin.setRole(role);
-            admin.setStatus(UserStatusEnum.ACTIVE);
+            admin.setStatus(Status.ACTIVE);
 
             userRepository.save(admin);
         }

@@ -1,7 +1,6 @@
 package com.ptit.coffee_shop.common.enums;
 
-public enum UserStatusEnum {
+public enum Status {
     ACTIVE,
-    DELETED,
-    BANNED
+    INACTIVE
 }

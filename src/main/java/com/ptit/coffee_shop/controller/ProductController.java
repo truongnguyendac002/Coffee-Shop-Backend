@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/api/product")
 public class ProductController {
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String > getAllProduct() {
         int a = 1;

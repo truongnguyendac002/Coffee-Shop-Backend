@@ -2,7 +2,7 @@ package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.enums.RoleEnum;
-import com.ptit.coffee_shop.common.enums.UserStatusEnum;
+import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.payload.request.LoginRequest;
@@ -17,8 +17,6 @@ import com.ptit.coffee_shop.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -81,7 +79,7 @@ public class AuthService {
                 .email(emailDto)
                 .password(passwordEncoder.encode(passwordDto))
                 .role(role)
-                .status(UserStatusEnum.ACTIVE)
+                .status(Status.ACTIVE)
                 .build();
         userRepository.save(user);
         RespMessage respMessage = messageBuilder.buildSuccessMessage(user);
