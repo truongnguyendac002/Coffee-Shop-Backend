@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.security;
 
+import com.ptit.coffee_shop.exception.CoffeeShopException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        return null;
+        else {
+            return null;
+        }
     }
 }

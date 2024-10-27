@@ -1,15 +1,24 @@
 package com.ptit.coffee_shop.service;
 
+import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.enums.RoleEnum;
+import com.ptit.coffee_shop.common.enums.UserStatusEnum;
+import com.ptit.coffee_shop.config.MessageBuilder;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.payload.request.LoginRequest;
 import com.ptit.coffee_shop.payload.request.RegisterRequest;
 import com.ptit.coffee_shop.model.Role;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.response.LoginResponse;
+import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.RoleRepository;
 import com.ptit.coffee_shop.repository.UserRepository;
 import com.ptit.coffee_shop.security.JwtTokenProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,35 +35,82 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MessageBuilder messageBuilder;
 
-    public LoginResponse login(LoginRequest loginRequest) {
+    // Login method
+    public RespMessage login(LoginRequest loginRequest) {
+        checkLoginRequest(loginRequest);
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         LoginResponse response = jwtTokenProvider.generateToken(authentication);
-
-        return response;
+        return messageBuilder.buildSuccessMessage(response);
     }
 
-    public String register(RegisterRequest registerRequest) {
+    private void checkLoginRequest(LoginRequest loginRequest) {
+        if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Email"}, "LoginRequest.Email must be not null");
+        }
+        if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Password"}, "LoginRequest.Password must be not null");
+        }
+        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
+        if (userOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"LoginRequest.Email"}, "Email not found");
+        }
+        if (!passwordEncoder.matches(loginRequest.getPassword(), userOptional.get().getPassword())) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"LoginRequest.Password"}, "Password not correct");
+        }
+        if (!userOptional.get().isEnabled()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"LoginRequest.Email"}, "User is disabled");
+        }
+
+    }
+
+    // Register method
+    @Transactional
+    public RespMessage register(RegisterRequest registerRequest) {
+        checkRegisterRequest(registerRequest);
         String emailDto = registerRequest.getEmail();
         String passwordDto = registerRequest.getPassword();
-        if (userRepository.existsUserByEmail(emailDto)){
-            return "Email is already exists!.";
-        }
-        if (!passwordDto.equals(registerRequest.getConfirmPassword())){
-            return "Password and Confirm Password must be the same!.";
-        }
-        Optional<Role> roleOptional = roleRepository.findByName("ROLE_USER");
-        if (roleOptional.isEmpty()){
-            return "Role not found!.";
-        }
+
+        Role role = roleRepository.getRoleByName(RoleEnum.ROLE_USER)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"Role"}, "Role not found"));
         User user = User.builder()
                 .email(emailDto)
                 .password(passwordEncoder.encode(passwordDto))
-                .role(roleOptional.get())
+                .role(role)
+                .status(UserStatusEnum.ACTIVE)
                 .build();
         userRepository.save(user);
-        return "User registered successfully!.";
+        RespMessage respMessage = messageBuilder.buildSuccessMessage(user);
+        return respMessage;
     }
+
+    public void checkRegisterRequest(RegisterRequest registerRequest) {
+        if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Email"}, "RegisterRequest.Email must be not null");
+        }
+        if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Password"}, "RegisterRequest.Password must be not null");
+        }
+        if (registerRequest.getConfirmPassword() == null || registerRequest.getConfirmPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.ConfirmPassword"}, "RegisterRequest.ConfirmPassword must be not null");
+        }
+
+        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RegisterRequest.Password"}, "RegisterRequest.Password and RegisterRequest.ConfirmPassword must be the same");
+        }
+
+        if (userRepository.existsUserByEmail(registerRequest.getEmail())) {
+            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"RegisterRequest.Email"}, "RegisterRequest.Email is existed");
+        }
+    }
+
+    public RespMessage logout() {
+        SecurityContextHolder.clearContext();
+        return messageBuilder.buildSuccessMessage("Logout success!.");
+    }
+
 }

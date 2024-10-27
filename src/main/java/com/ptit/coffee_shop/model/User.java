@@ -1,12 +1,16 @@
 package com.ptit.coffee_shop.model;
 
+import com.ptit.coffee_shop.common.enums.UserStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 @Entity
@@ -15,7 +19,7 @@ import java.util.Date;
 @Data
 @Builder
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -33,6 +37,9 @@ public class User {
     @Column(name = "created_at")
     private Date created_at;
 
+    @Column(name = "updated_at")
+    private Date updated_at;
+
     @Column(name= "phone")
     private String phone;
 
@@ -40,7 +47,8 @@ public class User {
     private String name;
 
     @Column(name = "status")
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    private UserStatusEnum status;
 
     @Column(name = "profile_img")
     private String profile_img;
@@ -48,5 +56,25 @@ public class User {
     @PrePersist
     public void prePersist() {
         created_at = new Date();
+        if (updated_at == null) updated_at = created_at;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updated_at = new Date();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role != null ? role.getAuthorities() : Collections.emptyList();
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    public boolean isEnabled() {
+        return status.equals(UserStatusEnum.ACTIVE);
     }
 }

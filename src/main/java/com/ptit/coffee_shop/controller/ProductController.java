@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/api/product")
 public class ProductController {
-    @RequestMapping(value = "/get-all", method = RequestMethod.GET)
+    @RequestMapping(value = "/get-all", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String > getAllProduct() {
         int a = 1;
         int b = 2;
