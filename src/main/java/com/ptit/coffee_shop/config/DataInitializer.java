@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,10 +26,11 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         for (RoleEnum roleEnum : RoleEnum.values()) {
             if (!roleRepository.existsByName(roleEnum)) {
                 Role role = new Role();
@@ -40,7 +42,7 @@ public class DataInitializer implements CommandLineRunner {
         if (!userRepository.existsUserByEmail(adminEmail)) {
             User admin = new User();
             admin.setEmail(adminEmail);
-            admin.setPassword(adminPassword);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             Role role = roleRepository.getRoleByName(RoleEnum.ROLE_ADMIN)
                     .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"DataInitializer.run"}, "Role Admin not found"));
             admin.setRole(role);
