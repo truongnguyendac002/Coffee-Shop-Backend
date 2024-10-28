@@ -21,10 +21,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class ProductController {
     private final ProductService productService;
     private final MessageBuilder messageBuilder;
+
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> getProducts() {
-        return ResponseEntity.ok("Hello");
+    public ResponseEntity<String> getAllProducts() {
+        RespMessage respMessage = productService.getAllProduct();
+        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")

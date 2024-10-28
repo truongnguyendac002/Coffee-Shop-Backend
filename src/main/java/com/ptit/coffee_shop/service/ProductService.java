@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,6 +28,11 @@ public class ProductService {
     private final BrandRepository brandRepository;
     private final TypeProductRepository typeProductRepository;
     private final MessageBuilder messageBuilder;
+
+    public RespMessage getAllProduct() {
+        List<Product> products = productRepository.findAll();
+        return messageBuilder.buildSuccessMessage(products);
+    }
 
     public RespMessage addProduct(ProductRequest productRequest) {
         if (productRequest.getName() == null || productRequest.getName().isEmpty()) {
