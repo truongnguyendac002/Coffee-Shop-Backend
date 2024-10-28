@@ -3,6 +3,7 @@ package com.ptit.coffee_shop.service;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -12,14 +13,22 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    @Autowired
     private UserRepository userRepository;
 
     public List<User> getAllUsers(){
-        return userRepository.findAll();
+        return userRepository.getAllUser();
     }
 
     public User getUserById(Long id){
-        return userRepository.getById(id);
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()) {
+            System.out.println("User found with ID: " + id);
+            return userOptional.get();
+        } else {
+            System.out.println("User not found with ID: " + id);
+            throw new RuntimeException("User not found");
+        }
     }
 
     public Optional<User> getUserByEmail(String email){
