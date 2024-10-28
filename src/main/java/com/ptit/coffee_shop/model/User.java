@@ -40,7 +40,7 @@ public class User {
     private String name;
 
     @Column(name = "status")
-    private boolean status;
+    private String status;
 
     @Column(name = "profile_img")
     private String profile_img;
