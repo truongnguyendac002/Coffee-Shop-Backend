@@ -27,9 +27,9 @@ public MessageBuilder(final @Qualifier("com.ptit.coffee_shop.config.messageSourc
                 .build();
     }
     public RespMessage buildSuccessMessage(Object data){
-        String desc = messageSource.getMessage(Constant.SUCCESS_CODE, null, Constant.UNDEFINED , LocaleContextHolder.getLocale());
+        String desc = messageSource.getMessage(Constant.SUCCESS, null, Constant.UNDEFINED , LocaleContextHolder.getLocale());
         return RespMessage.builder()
-                .respCode(Constant.SUCCESS_CODE)
+                .respCode(Constant.SUCCESS)
                 .respDesc(desc)
                 .data(data)
                 .build();

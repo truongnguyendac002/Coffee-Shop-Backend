@@ -4,7 +4,7 @@ public class Constant {
 
         public Constant(){}
 
-        public static final String SUCCESS_CODE = "000";
+        public static final String SUCCESS = "000";
         public static final String FIELD_NOT_NULL = "100";
         public static final String FIELD_NOT_VALID = "101";
         public static final String FIELD_EXISTED = "102";
