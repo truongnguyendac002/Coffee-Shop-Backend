@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.security;
 
+import com.ptit.coffee_shop.common.enums.RoleEnum;
 import com.ptit.coffee_shop.exception.JwtAPIException;
 import com.ptit.coffee_shop.payload.response.LoginResponse;
 import io.jsonwebtoken.*;

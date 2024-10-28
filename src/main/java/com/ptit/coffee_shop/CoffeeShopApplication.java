@@ -7,16 +7,11 @@ import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-@RestController
 public class CoffeeShopApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CoffeeShopApplication.class, args);
 	}
 
-	@GetMapping("/")
-	public String home() {
-		return "Welcome to the Coffee Shop!";
-	}
 
 }
