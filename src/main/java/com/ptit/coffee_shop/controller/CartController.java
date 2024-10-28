@@ -10,11 +10,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 @AllArgsConstructor
+@PreAuthorize("hasRole('ROLE_USER')")
 @RequestMapping("/api/cart")
 public class CartController {
-    @PreAuthorize("hasRole('ROLE_USER')")
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getCart(@RequestBody String UserId) {
+    public ResponseEntity<String> getCartItems(@RequestBody String UserId) {
+        return ResponseEntity.ok("Hello");
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
+    public ResponseEntity<String> addCartItem(@RequestBody String UserId) {
         return ResponseEntity.ok("Hello");
     }
 
