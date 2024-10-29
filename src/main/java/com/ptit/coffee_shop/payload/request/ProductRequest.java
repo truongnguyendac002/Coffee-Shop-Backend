@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@Data
 @NoArgsConstructor
+@Data
 public class ProductRequest {
     @JsonProperty("Name")
     private String name;

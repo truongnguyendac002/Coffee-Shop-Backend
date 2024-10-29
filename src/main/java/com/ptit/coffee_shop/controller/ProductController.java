@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.controller;
 
+import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
@@ -27,7 +28,6 @@ public class ProductController {
         RespMessage respMessage = productService.getAllProduct();
         return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
-
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> addProduct(@RequestBody ProductRequest request) {
@@ -39,7 +39,10 @@ public class ProductController {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
         }
-
+        catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT, produces = "application/json")

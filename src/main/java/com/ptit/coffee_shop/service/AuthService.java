@@ -38,7 +38,6 @@ public class AuthService {
     // Login method
     public RespMessage login(LoginRequest loginRequest) {
         checkLoginRequest(loginRequest);
-
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -63,7 +62,6 @@ public class AuthService {
         if (!userOptional.get().isEnabled()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"LoginRequest.Email"}, "User is disabled");
         }
-
     }
 
     // Register method
@@ -82,7 +80,7 @@ public class AuthService {
                 .status(Status.ACTIVE)
                 .build();
         userRepository.save(user);
-        RespMessage respMessage = messageBuilder.buildSuccessMessage(user);
+        RespMessage respMessage = messageBuilder.buildSuccessMessage(null);
         return respMessage;
     }
 

@@ -29,13 +29,19 @@ public class ProductItemService {
 
     public RespMessage addProductItem(ProductItemRequest request) {
         if (request.getPrice() < 0) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Price"}, "Price must be greater than 0");
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Price"}, "Price can not be negative");
         }
         if (request.getStock() < 0) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Stock"}, "Stock must be greater than 0");
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Stock"}, "Stock can not be negative");
         }
         if (request.getDiscount() < 0) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Discount"}, "Discount must be greater than 0");
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Discount"}, "Discount can not be negative");
+        }
+        if (request.getProductId() <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"ProductId"}, "Product id must be greater than 0");
+        }
+        if (request.getTypeId() <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"TypeId"}, "Type id must be greater than 0");
         }
         Optional<Product> productOptional = productRepository.findById(request.getProductId());
         if (productOptional.isEmpty()) {

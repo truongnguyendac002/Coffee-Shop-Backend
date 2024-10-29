@@ -38,6 +38,13 @@ public class ProductService {
         if (productRequest.getName() == null || productRequest.getName().isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Product name must be not null");
         }
+        if (productRequest.getCategoryId() <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"categoryId"}, "Category id invalid");
+        }
+        if (productRequest.getBrandId() <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"brandId"}, "Brand id invalid");
+        }
+
         Optional<Category> categoryOptional = categoryRepository.findById(productRequest.getCategoryId());
         if (categoryOptional.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"categoryId"}, "Category id not found");

@@ -1,6 +1,8 @@
 package com.ptit.coffee_shop.security;
 
+import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.enums.RoleEnum;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.exception.JwtAPIException;
 import com.ptit.coffee_shop.payload.response.LoginResponse;
 import io.jsonwebtoken.*;
@@ -76,13 +78,13 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
             return true;
         } catch (MalformedJwtException ex) {
-            throw new JwtAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
+            throw new CoffeeShopException(Constant.UNAUTHORIZED,null, "Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            throw new JwtAPIException(HttpStatus.BAD_REQUEST, "Expired JWT token");
+            throw new CoffeeShopException(Constant.UNAUTHORIZED,null, "Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            throw new JwtAPIException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
+            throw new CoffeeShopException(Constant.UNAUTHORIZED,null, "Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            throw new JwtAPIException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT claims string is empty.");
         }
     }
 }
