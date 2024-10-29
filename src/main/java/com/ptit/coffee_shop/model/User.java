@@ -53,6 +53,9 @@ public class User implements UserDetails {
     @Column(name = "profile_img")
     private String profile_img;
 
+    @OneToOne(mappedBy = "user")
+    private ForgotPassword forgotPassword;
+
     @PrePersist
     public void prePersist() {
         created_at = new Date();
