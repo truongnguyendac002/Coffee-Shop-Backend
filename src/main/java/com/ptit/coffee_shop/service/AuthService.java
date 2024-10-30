@@ -38,7 +38,6 @@ public class AuthService {
     // Login method
     public RespMessage login(LoginRequest loginRequest) {
         checkLoginRequest(loginRequest);
-
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -48,10 +47,10 @@ public class AuthService {
 
     private void checkLoginRequest(LoginRequest loginRequest) {
         if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Email"}, "LoginRequest.Email must be not null");
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Email"}, "Email must be not null");
         }
         if (loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Password"}, "LoginRequest.Password must be not null");
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"LoginRequest.Password"}, "Password must be not null");
         }
         Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
         if (userOptional.isEmpty()) {
@@ -63,7 +62,6 @@ public class AuthService {
         if (!userOptional.get().isEnabled()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"LoginRequest.Email"}, "User is disabled");
         }
-
     }
 
     // Register method
@@ -82,27 +80,27 @@ public class AuthService {
                 .status(Status.ACTIVE)
                 .build();
         userRepository.save(user);
-        RespMessage respMessage = messageBuilder.buildSuccessMessage(user);
+        RespMessage respMessage = messageBuilder.buildSuccessMessage(null);
         return respMessage;
     }
 
     public void checkRegisterRequest(RegisterRequest registerRequest) {
         if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Email"}, "RegisterRequest.Email must be not null");
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Email"}, "Email must be not null");
         }
         if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Password"}, "RegisterRequest.Password must be not null");
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.Password"}, "Password must be not null");
         }
         if (registerRequest.getConfirmPassword() == null || registerRequest.getConfirmPassword().isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.ConfirmPassword"}, "RegisterRequest.ConfirmPassword must be not null");
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"RegisterRequest.ConfirmPassword"}, "ConfirmPassword must be not null");
         }
 
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RegisterRequest.Password"}, "RegisterRequest.Password and RegisterRequest.ConfirmPassword must be the same");
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RegisterRequest.Password"}, "Password and RegisterRequest.ConfirmPassword must be the same");
         }
 
         if (userRepository.existsUserByEmail(registerRequest.getEmail())) {
-            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"RegisterRequest.Email"}, "RegisterRequest.Email is existed");
+            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"RegisterRequest.Email"}, "Email is existed");
         }
     }
 

@@ -12,5 +12,4 @@ public class RespMessage {
     private String respCode;
     private String respDesc;
     private Object data;
-
 }
