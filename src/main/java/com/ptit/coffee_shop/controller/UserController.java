@@ -3,6 +3,7 @@ package com.ptit.coffee_shop.controller;
 
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.model.User;
+import com.ptit.coffee_shop.payload.request.UserRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("api/user")
 public class UserController {
 
@@ -25,7 +26,7 @@ public class UserController {
     private MessageBuilder messageBuilder;
 
     @GetMapping("/get-all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('RADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
@@ -58,7 +59,7 @@ public class UserController {
 
     @PutMapping("/update-profile/{userId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<RespMessage> updateUserProfile(@PathVariable Long userId, @RequestBody User updatedUser) {
+    public ResponseEntity<RespMessage> updateUserProfile(@PathVariable Long userId, @RequestBody UserRequest updatedUser) {
         try {
             User savedUser = userService.updateUserInfo(userId, updatedUser);
             return ResponseEntity.ok(messageBuilder.buildSuccessMessage(savedUser));
