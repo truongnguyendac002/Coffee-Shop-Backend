@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -52,6 +53,12 @@ public class User implements UserDetails {
 
     @Column(name = "profile_img")
     private String profile_img;
+
+    @OneToOne(mappedBy = "user")
+    private ForgotPassword forgotPassword;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ShippingAddress> shippingAddress;
 
     @PrePersist
     public void prePersist() {
