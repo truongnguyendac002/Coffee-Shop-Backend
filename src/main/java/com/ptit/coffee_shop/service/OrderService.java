@@ -76,7 +76,7 @@ public class OrderService {
                 throw new CoffeeShopException(Constant.NOT_FOUND,  new Object[] {"product_item"}, "ProductItem not found");
             }
 
-            int stock = productItemRepository.getStockByProductId(productItemId);
+            int stock = productItemOptional.get().getStock();
             int orderedAmount = orderItemRequest.getAmount();
 
             if (orderedAmount > stock) {

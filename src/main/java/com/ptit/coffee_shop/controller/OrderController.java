@@ -11,6 +11,7 @@ import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.OrderRepository;
 import com.ptit.coffee_shop.service.OrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +23,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order")
 public class OrderController {
-
+    @Autowired
     private final OrderService orderService;
+    @Autowired
     private final MessageBuilder messageBuilder;
 
 
@@ -75,8 +77,8 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/cancle-order/{orderId}")
-    public ResponseEntity<String> cancleOrder(@PathVariable long orderId) {
+    @PutMapping("/cancel-order/{orderId}")
+    public ResponseEntity<String> cancelOrder(@PathVariable long orderId) {
         try {
             RespMessage respMessage = orderService.cancelOrder(orderId);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
