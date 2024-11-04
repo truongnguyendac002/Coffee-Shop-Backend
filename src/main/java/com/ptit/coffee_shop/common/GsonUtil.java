@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GsonUtil {
 
-    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private static final Gson gson = new GsonBuilder().
+            disableHtmlEscaping()
+            .serializeNulls()
+            .create();
 
-    public static Gson getInstance(){
+    public static Gson getInstance() {
         return gson;
     }
 }

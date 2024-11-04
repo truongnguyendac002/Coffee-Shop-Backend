@@ -11,6 +11,7 @@ import com.ptit.coffee_shop.model.Role;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.response.LoginResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.payload.response.UserDTO;
 import com.ptit.coffee_shop.repository.RoleRepository;
 import com.ptit.coffee_shop.repository.UserRepository;
 import com.ptit.coffee_shop.security.JwtTokenProvider;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -104,9 +106,27 @@ public class AuthService {
         }
     }
 
-    public RespMessage logout() {
-        SecurityContextHolder.clearContext();
-        return messageBuilder.buildSuccessMessage("Logout success!.");
-    }
+    public RespMessage getProfileByToken() {
+        try {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email = userDetails.getUsername();
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found when get profile by token"));
 
+            UserDTO userDTO = UserDTO.builder()
+                    .name(user.getName())
+                    .email(user.getEmail())
+                    .phone(user.getPhone())
+                    .roleName(user.getRole().getName().name())
+                    .profile_img(user.getProfile_img())
+                    .status(user.getStatus().name())
+                    .id(user.getId())
+                    .build();
+            return messageBuilder.buildSuccessMessage(userDTO);
+
+        }
+        catch(Exception e) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"Token"}, "Token is null or not valid");
+        }
+    }
 }

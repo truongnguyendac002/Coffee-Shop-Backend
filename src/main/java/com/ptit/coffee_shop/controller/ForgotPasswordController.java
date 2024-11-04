@@ -42,6 +42,23 @@ public class ForgotPasswordController {
 
         User user = optionalUser.get();
 
+        Optional<ForgotPassword> existingOtpRecord =forgotPasswordRepository.findByUser(user);
+        if (existingOtpRecord.isPresent()) {
+            ForgotPassword forgotPassword = existingOtpRecord.get();
+            Date currentDate = new Date();
+
+            // Kiểm tra thời hạn của OTP
+            if (forgotPassword.getExpirationTime().after(currentDate)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RespMessage.builder()
+                        .respCode("104")
+                        .respDesc("OTP has already been sent and is still valid.")
+                        .build());
+            } else {
+                // Xóa OTP đã hết hạn
+                forgotPasswordRepository.deleteById(forgotPassword.getId());
+            }
+        }
+
         int otp = generateOtpForUser();
 
         MailBody mailBody =MailBody.builder()

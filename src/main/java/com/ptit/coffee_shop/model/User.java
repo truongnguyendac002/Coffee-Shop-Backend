@@ -84,4 +84,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return status.equals(Status.ACTIVE);
     }
+
 }

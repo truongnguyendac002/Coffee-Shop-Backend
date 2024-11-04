@@ -12,11 +12,13 @@ import com.ptit.coffee_shop.repository.ProductItemRepository;
 import com.ptit.coffee_shop.repository.ProductRepository;
 import com.ptit.coffee_shop.repository.TypeProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ProductItemService {
     public final ProductItemRepository productItemRepository;
@@ -51,6 +53,9 @@ public class ProductItemService {
         if (typeProductOptional.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"TypeId"}, "Type id not found");
         }
+        if (productItemRepository.existsByProductIdAndTypeId(request.getProductId(), request.getTypeId())) {
+            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"ProductItem"}, "ProductItem already exists");
+        }
 
         ProductItem productItem = new ProductItem();
         productItem.setPrice(request.getPrice());
@@ -62,6 +67,7 @@ public class ProductItemService {
             productItemRepository.save(productItem);
         }
         catch (Exception e) {
+            log.error("ProductItem can not be added", e);
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e}, "ProductItem can not be added");
         }
         return messageBuilder.buildSuccessMessage(productItem);

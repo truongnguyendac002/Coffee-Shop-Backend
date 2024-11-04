@@ -66,4 +66,15 @@ public class CartService {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Save Cart Item failed");
         }
     }
+
+    public RespMessage getCartItems(Long userId) {
+        if (userId <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"UserId"}, "UserId invalid");
+        }
+        try {
+            return messageBuilder.buildSuccessMessage(cartItemRepository.findByUserId(userId));
+        } catch (Exception e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Get Cart Item failed");
+        }
+    }
 }
