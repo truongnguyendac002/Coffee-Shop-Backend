@@ -1,7 +1,10 @@
 package com.ptit.coffee_shop.controller;
 
 
+import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.UserRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
@@ -26,10 +29,10 @@ public class UserController {
     private MessageBuilder messageBuilder;
 
     @GetMapping("/get-all")
-    @PreAuthorize("hasRole('RADMIN')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAllUsers() {
+        RespMessage respMessage = userService.getAllUsers();
+        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
 
     @PutMapping("/ban/{userId}")
@@ -40,7 +43,7 @@ public class UserController {
             return ResponseEntity.ok(messageBuilder.buildSuccessMessage(bannedUser));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(messageBuilder.buildFailureMessage("103", new Object[]{"User"}, null)
+                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage())
                     );
         }
     }
@@ -53,7 +56,7 @@ public class UserController {
             return ResponseEntity.ok(messageBuilder.buildSuccessMessage(unbannedUser));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(messageBuilder.buildFailureMessage("103", new Object[]{"User"}, null));
+                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
         }
     }
 
@@ -65,7 +68,7 @@ public class UserController {
             return ResponseEntity.ok(messageBuilder.buildSuccessMessage(savedUser));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(messageBuilder.buildFailureMessage("103", new Object[]{"User"}, null));
+                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
         }
     }
 
@@ -75,9 +78,12 @@ public class UserController {
         try {
             User user = userService.getUserById(userId);
             return ResponseEntity.ok(messageBuilder.buildSuccessMessage(user));
-        } catch (RuntimeException e) {
+        } catch (CoffeeShopException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(messageBuilder.buildFailureMessage("103", new Object[]{"User"}, null));
+                    .body(messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage()));
+        } catch ( RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
         }
     }
 }

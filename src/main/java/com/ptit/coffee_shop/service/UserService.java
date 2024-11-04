@@ -1,8 +1,10 @@
 package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.UserRequest;
+import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,19 +18,20 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private MessageBuilder messageBuilder;
 
-    public List<User> getAllUsers(){
-        return userRepository.getAllUser();
+    public RespMessage getAllUsers(){
+        List<User> users = userRepository.getAllUser();
+        return messageBuilder.buildSuccessMessage(users);
     }
 
-    public User getUserById(Long id){
-        Optional<User> userOptional = userRepository.findById(id);
+    public User getUserById(Long userId){
+        Optional<User> userOptional = userRepository.findById(userId);
         if(userOptional.isPresent()) {
-            System.out.println("User found with ID: " + id);
             return userOptional.get();
         } else {
-            System.out.println("User not found with ID: " + id);
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("User not found with ID: " + userId);
         }
     }
 
@@ -40,14 +43,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User banUser(Long id){
-        Optional<User> optionalUser = userRepository.findById(id);
+    public User banUser(Long userId){
+        Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
             user.setStatus(Status.INACTIVE);
             return userRepository.save(user);
         }
-        throw new RuntimeException("User not found");
+        throw new RuntimeException("User not found with ID: " + userId);
     }
 
     public User unbanUser(Long userId) {
@@ -57,7 +60,7 @@ public class UserService {
             user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
-        throw new RuntimeException("User not found");
+        throw new RuntimeException("User not found with ID: " + userId);
     }
 
     public User updateUserInfo(Long userId, UserRequest updatedUser){
@@ -70,6 +73,6 @@ public class UserService {
             currentUser.setProfile_img(updatedUser.getProfileImg());
             return userRepository.save(currentUser);
         }
-        throw new RuntimeException("User not found");
+        throw new RuntimeException("User not found with ID: " + userId);
     }
 }
