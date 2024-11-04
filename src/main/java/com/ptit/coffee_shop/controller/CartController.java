@@ -20,9 +20,19 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     private final CartService cartService;
     public final MessageBuilder messageBuilder;
-    @RequestMapping(value = "user", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getCartItems(@RequestParam String userId) {
-        return ResponseEntity.ok("Hello");
+    @RequestMapping(value = "user/{userId}", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<String> getCartItems(@PathVariable Long userId) {
+        try {
+            RespMessage resp = cartService.getCartItems(userId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addCartItem(@RequestBody CartItemRequest request) {

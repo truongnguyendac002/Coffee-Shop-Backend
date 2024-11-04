@@ -1,6 +1,8 @@
 package com.ptit.coffee_shop.repository;
 
+import com.ptit.coffee_shop.model.Product;
 import com.ptit.coffee_shop.model.ProductItem;
+import com.ptit.coffee_shop.model.TypeProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -37,4 +39,6 @@ public interface ProductItemRepository extends JpaRepository<ProductItem, Long> 
     List<ProductItem> findByProductIdAndTypeIdAndPriceAndDiscount(long productId, long typeId, double price, double discount);
     List<ProductItem> findByProductIdAndTypeIdAndStockAndDiscount(long productId, long typeId, int stock, double discount);
     List<ProductItem> findByProductIdAndPriceAndStockAndDiscount(long productId, double price , int stock, double discount);
+
+    boolean existsByProductIdAndTypeId(long productId, long typeId);
 }

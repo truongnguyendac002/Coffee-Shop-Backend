@@ -3,6 +3,7 @@ package com.ptit.coffee_shop.service;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -11,7 +12,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-
+    @Autowired
     private UserRepository userRepository;
 
     public List<User> getAllUsers(){

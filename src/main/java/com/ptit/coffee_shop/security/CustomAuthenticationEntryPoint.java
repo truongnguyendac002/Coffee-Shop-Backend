@@ -18,9 +18,10 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public final MessageBuilder messageBuilder;
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        RespMessage respMessage = request.getAttribute("exception") != null ? (RespMessage) request.getAttribute("exception") : messageBuilder.buildFailureMessage(Constant.UNAUTHORIZED, null,"You must login to access this resource");
+        RespMessage respMessage = request.getAttribute("exception") != null ? (RespMessage) request.getAttribute("exception") : messageBuilder.buildFailureMessage(Constant.UNAUTHORIZED, null, "You must login to access this resource");
         response.setContentType("application/json");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(GsonUtil.getInstance().toJson(respMessage));
