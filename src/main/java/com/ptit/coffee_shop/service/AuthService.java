@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -147,12 +148,15 @@ public class AuthService {
                 .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found for provided refresh token"));
 
         String newAccessToken = jwtTokenProvider.generateAccessToken(username);
-
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
 
         return RespMessage.builder()
                 .respCode("000")
                 .respDesc("Access token refreshed successfully")
-                .data(newAccessToken)
+                .data(Map.of(
+                        "accessToken", newAccessToken,
+                        "refreshToken", newRefreshToken
+                ))
                 .build();
     }
 

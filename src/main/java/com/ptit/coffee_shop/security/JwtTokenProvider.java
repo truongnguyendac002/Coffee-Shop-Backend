@@ -109,4 +109,17 @@ public class JwtTokenProvider {
                 .signWith(key())
                 .compact();
     }
+    public String generateRefreshToken(String username) {
+        Date currentDate = new Date();
+        Date refreshExpireDate = new Date(currentDate.getTime() + jwtRefreshExpirationDate);
+
+
+        return  Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(currentDate)
+                .setExpiration(refreshExpireDate)
+                .signWith(key()) // Use a method to retrieve your secret key
+                .compact();
+    }
+
 }
