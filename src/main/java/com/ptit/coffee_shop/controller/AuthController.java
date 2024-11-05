@@ -50,7 +50,7 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(value = "/user-details", method = RequestMethod.GET)
     public ResponseEntity<String> getAccount() {
         try {
             RespMessage response = authService.getProfileByToken();
@@ -59,6 +59,12 @@ public class AuthController {
             RespMessage response = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(response), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<RespMessage> refreshAccessToken(@RequestHeader("Authorization") String refreshToken) {
+        RespMessage response = authService.refreshAccessToken(refreshToken);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

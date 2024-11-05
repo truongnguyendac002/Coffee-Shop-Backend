@@ -98,4 +98,15 @@ public class JwtTokenProvider {
             throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT claims string is empty.");
         }
     }
+    public String generateAccessToken(String username) {
+        Date currentDate = new Date();
+        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(currentDate)
+                .setExpiration(expireDate)
+                .signWith(key())
+                .compact();
+    }
 }

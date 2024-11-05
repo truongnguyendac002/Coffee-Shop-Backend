@@ -129,4 +129,31 @@ public class AuthService {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"Token"}, "Token is null or not valid");
         }
     }
+
+    public RespMessage refreshAccessToken(String refreshToken) {
+
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RefreshToken"}, "Refresh token is missing or invalid");
+        }
+
+        refreshToken = refreshToken.substring(7);
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RefreshToken"}, "Invalid refresh token");
+        }
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found for provided refresh token"));
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(username);
+
+
+        return RespMessage.builder()
+                .respCode("000")
+                .respDesc("Access token refreshed successfully")
+                .data(newAccessToken)
+                .build();
+    }
+
 }
