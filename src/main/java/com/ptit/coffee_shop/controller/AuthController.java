@@ -50,4 +50,15 @@ public class AuthController {
         }
     }
 
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    public ResponseEntity<String> getAccount() {
+        try {
+            RespMessage response = authService.getProfileByToken();
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(response), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage response = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(response), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

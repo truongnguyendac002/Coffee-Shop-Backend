@@ -1,5 +1,7 @@
 package com.ptit.coffee_shop.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ptit.coffee_shop.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

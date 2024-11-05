@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.security;
 
+import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.payload.response.RespMessage;
@@ -50,6 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), null, e.getMessage());
+            request.setAttribute("exception", respMessage);
+        }
+        catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
             request.setAttribute("exception", respMessage);
         }
         filterChain.doFilter(request, response);

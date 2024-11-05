@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -56,6 +57,9 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private ForgotPassword forgotPassword;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ShippingAddress> shippingAddress;
+
     @PrePersist
     public void prePersist() {
         created_at = new Date();
@@ -80,4 +84,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return status.equals(Status.ACTIVE);
     }
+
 }

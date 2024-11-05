@@ -26,7 +26,7 @@ public class ProductItem {
     @Column(name = "discount")
     private double discount;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
     private Product product;
 
