@@ -67,15 +67,19 @@ public class ProductService {
     }
 
     @Transactional
-    public RespMessage addCategory(String name) {
+    public RespMessage addCategory(String name , String description) {
         if (name == null || name.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Category name must be not null");
         }
         if (categoryRepository.findByName(name).isPresent()) {
             throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"name"}, "Category name is duplicate");
         }
+
         Category category = new Category();
         category.setName(name);
+        if (description != null && !description.isEmpty()) {
+            category.setDescription(description);
+        }
         try {
             categoryRepository.save(category);
         } catch (Exception e) {
@@ -84,6 +88,13 @@ public class ProductService {
 
         return messageBuilder.buildSuccessMessage(category);
     }
+
+    @Transactional
+    public RespMessage getAllCategory() {
+        List<Category> categories = categoryRepository.findAll();
+        return  messageBuilder.buildSuccessMessage(categories);
+    }
+
 
     @Transactional
     public RespMessage addBrand(String name) {

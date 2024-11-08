@@ -23,6 +23,15 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+
+    @Column(name = "Description")
+    private String description;
+
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "default_image_id")
+    private Image defaultImage;
+
     @PrePersist
     public void prePersist() {
         if (status == null) status = Status.ACTIVE;

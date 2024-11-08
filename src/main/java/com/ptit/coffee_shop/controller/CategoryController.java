@@ -23,11 +23,13 @@ import java.util.Map;
 public class CategoryController {
     public final ProductService productService;
     public final MessageBuilder messageBuilder;
+
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addCategory(@RequestBody Map<String, String> payload) {
         String name = payload.get("name");
+        String description = payload.get("description");
         try {
-            RespMessage respMessage = productService.addCategory(name);
+            RespMessage respMessage = productService.addCategory(name,description);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         }
         catch (CoffeeShopException e) {
@@ -40,5 +42,12 @@ public class CategoryController {
         }
 
     }
+
+    @RequestMapping(value = "/all-category" , method = RequestMethod.GET , produces = "application/json")
+    public ResponseEntity<RespMessage> getAllCategory () {
+        RespMessage respMessage = productService.getAllCategory();
+        return new ResponseEntity<>(respMessage, HttpStatus.OK);
+    }
+
 
 }
