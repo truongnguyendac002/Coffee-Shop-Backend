@@ -77,4 +77,31 @@ public class CartService {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Get Cart Item failed");
         }
     }
+
+    public RespMessage updateCartItem( CartItemRequest cartItemRequest) {
+        ProductItem productItem = productItemRepository.findById(cartItemRequest.getProductItemId())
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"ProductItem"}, "ProductItem not found"));
+
+        User user = userRepository.findById(cartItemRequest.getUserId()).orElseThrow(
+                () -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"UserId"}, "UserId not found"));
+
+        CartItem cartItem = cartItemRepository.findByUserIdAndProductItemId(cartItemRequest.getUserId(), cartItemRequest.getProductItemId())
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"CartItem"}, "CartItem not found"));
+
+        if (cartItemRequest.getQuantity() <= 0) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Quantity"}, "Quantity must be greater than 0");
+        }
+        if (cartItemRequest.getQuantity() > productItem.getStock()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"Quantity"}, "Quantity must be less than or equal to ProductItem quantity");
+        }
+
+        cartItem.setQuantity(cartItemRequest.getQuantity());
+
+        try {
+            cartItemRepository.save(cartItem);
+            return messageBuilder.buildSuccessMessage(cartItem);
+        } catch (Exception e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Update Cart Item failed");
+        }
+    }
 }
