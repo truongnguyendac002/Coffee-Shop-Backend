@@ -23,7 +23,7 @@ public class ProductController {
     private final ProductService productService;
     private final MessageBuilder messageBuilder;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/all-product", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> getAllProducts() {
         RespMessage respMessage = productService.getAllProduct();
         return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);

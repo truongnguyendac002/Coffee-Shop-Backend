@@ -37,6 +37,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/forgotPassword/**").permitAll()
+                        .requestMatchers("/api/category/**").permitAll()
+                        .requestMatchers("/api/product/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(customAuthenticationEntryPoint)
@@ -45,5 +47,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }
