@@ -1,5 +1,7 @@
 package com.ptit.coffee_shop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
@@ -20,6 +22,12 @@ public class OrderItem {
 
     @Column(name = "amount", nullable = false)
     private int amount;
+
+    @Column(name = "price")
+    private double price;
+
+    @Column(name = "discount")
+    private double discount;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_item_id")

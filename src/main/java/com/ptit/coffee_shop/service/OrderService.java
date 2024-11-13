@@ -40,6 +40,7 @@ public class OrderService {
 
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
+//        List<OrderItem> orderItems = orders.getFirst().getOrderItems();
         return messageBuilder.buildSuccessMessage(orders);
     }
 
@@ -85,7 +86,6 @@ public class OrderService {
             OrderItem orderItem = new OrderItem();
             orderItem.setProductItem(productItemOptional.get());
             orderItem.setAmount(orderItem.getAmount());
-            orderItem.setOrder(order);
             orderItems.add(orderItem);
         }
         order.setOrderItems(orderItems);
@@ -93,7 +93,7 @@ public class OrderService {
         try {
             orderRepository.save(order);
         } catch (Exception e) {
-            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e}, "Order can not be added");
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"order"}, "Order can not be added");
         }
         return messageBuilder.buildSuccessMessage(order);
     }

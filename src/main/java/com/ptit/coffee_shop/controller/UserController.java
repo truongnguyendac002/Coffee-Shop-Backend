@@ -8,6 +8,7 @@ import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.UserRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.payload.response.UserDTO;
 import com.ptit.coffee_shop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,53 +35,58 @@ public class UserController {
 
     @PutMapping("/ban/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RespMessage> banUser(@PathVariable Long userId) {
+    public ResponseEntity<String> banUser(@PathVariable Long userId) {
         try {
-            User bannedUser = userService.banUser(userId);
-            return ResponseEntity.ok(messageBuilder.buildSuccessMessage(bannedUser));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage())
-                    );
+            RespMessage respMessage = userService.banUser(userId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(),e.getObjects(),e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/unban/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<RespMessage> unbanUser(@PathVariable Long userId) {
+    public ResponseEntity<String> unbanUser(@PathVariable Long userId) {
         try {
-            User unbannedUser = userService.unbanUser(userId);
-            return ResponseEntity.ok(messageBuilder.buildSuccessMessage(unbannedUser));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
+            RespMessage respMessage = userService.unbanUser(userId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(),e.getObjects(),e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/update-profile/{userId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<RespMessage> updateUserProfile(@PathVariable Long userId, @RequestBody UserRequest updatedUser) {
+    public ResponseEntity<String> updateUserProfile(@PathVariable Long userId, @RequestBody UserRequest updatedUser) {
         try {
-            User savedUser = userService.updateUserInfo(userId, updatedUser);
-            return ResponseEntity.ok(messageBuilder.buildSuccessMessage(savedUser));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
+            RespMessage respMessage = userService.updateUserInfo(userId, updatedUser);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(),e.getObjects(),e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/{userId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<RespMessage> getUserInfo(@PathVariable Long userId) {
+    public ResponseEntity<String> getUserInfo(@PathVariable Long userId) {
         try {
-            User user = userService.getUserById(userId);
-            return ResponseEntity.ok(messageBuilder.buildSuccessMessage(user));
-        } catch (CoffeeShopException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage()));
+            RespMessage respMessage = userService.getUserById(userId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch ( RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage()));
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 }

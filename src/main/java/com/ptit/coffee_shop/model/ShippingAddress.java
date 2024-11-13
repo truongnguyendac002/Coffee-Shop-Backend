@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,7 @@ public class ShippingAddress {
     private String location;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToOne(cascade = CascadeType.ALL)
