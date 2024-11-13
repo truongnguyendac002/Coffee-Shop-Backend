@@ -22,8 +22,7 @@ public class Category {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
-
-
+    
     @Column(name = "Description")
     private String description;
 

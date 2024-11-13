@@ -57,9 +57,6 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private ForgotPassword forgotPassword;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ShippingAddress> shippingAddress;
-
     @PrePersist
     public void prePersist() {
         created_at = new Date();

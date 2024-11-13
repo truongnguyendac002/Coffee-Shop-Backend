@@ -1,7 +1,9 @@
 package com.ptit.coffee_shop.service;
 
+import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.UserRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
@@ -30,7 +32,7 @@ public class UserService {
         if(userOptional.isPresent()) {
             return userOptional.get();
         } else {
-            throw new RuntimeException("User not found with ID: " + userId);
+            throw new CoffeeShopException(Constant.NOT_FOUND, null, "User not found with ID: " + userId);
         }
     }
 
