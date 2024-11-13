@@ -13,14 +13,14 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@Table(name = "forgot_password")
+@Table(name = "forgot_password")
 public class ForgotPassword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id ;
 
     @Column(nullable = false)
-    private Integer otp ;
+    private Integer otp;
 
     @Column(nullable = false)
     private Date expirationTime;

@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.payload.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ptit.coffee_shop.common.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,13 +11,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ShippingAddressRequest {
-    @JsonProperty("RecieverName")
+    @JsonProperty("id")
+    private long id;
+
+    @JsonProperty("reciever_name")
     private String recieverName;
 
-    @JsonProperty("RecieverPhone")
+    @JsonProperty("reciever_phone")
     private String recieverPhone;
 
-    @JsonProperty("Location")
+    @JsonProperty("location")
     private String location;
+
+    @JsonProperty("status")
+    private Status status;
+
+    @JsonProperty("user_id")
+    private Long userId;
 
 }

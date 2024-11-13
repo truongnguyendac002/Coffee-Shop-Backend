@@ -97,6 +97,9 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException ex) {
             throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT claims string is empty.");
         }
+        catch (Exception ex) {
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT token is invalid: " + ex.getMessage());
+        }
     }
     public String generateAccessToken(String username) {
         Date currentDate = new Date();
