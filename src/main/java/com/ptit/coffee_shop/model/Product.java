@@ -23,6 +23,7 @@ public class Product {
     @Column(name = "name")
     private String name;
 
+    @Lob
     @Column(name = "description")
     private String description;
 

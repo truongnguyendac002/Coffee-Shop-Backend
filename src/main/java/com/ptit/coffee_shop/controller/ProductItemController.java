@@ -4,6 +4,7 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.model.ProductItem;
 import com.ptit.coffee_shop.payload.request.ProductItemRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.ProductItemService;
@@ -11,9 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -54,8 +58,9 @@ public class ProductItemController {
         return ResponseEntity.ok("Hello");
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getProductItem() {
-        return ResponseEntity.ok("Hello");
+    @RequestMapping(value = "/{productId}", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<RespMessage> getProductItem(@PathVariable long productId) {
+        RespMessage respMessage= productItemService.getProductItem(productId);
+        return new ResponseEntity<>(respMessage, HttpStatus.OK);
     }
 }

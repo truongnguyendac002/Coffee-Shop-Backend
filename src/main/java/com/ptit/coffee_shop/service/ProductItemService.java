@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -73,6 +74,12 @@ public class ProductItemService {
         return messageBuilder.buildSuccessMessage(productItem);
     }
 
+    public RespMessage getProductItem (Long productId) {
+        return messageBuilder.buildSuccessMessage(productItemRepository.findByProductId(productId));
+
+    }
+
+
     public String updateProductItem() {
         return "Hello";
     }
@@ -81,7 +88,5 @@ public class ProductItemService {
         return "Hello";
     }
 
-    public String getProductItem() {
-        return "Hello";
-    }
+
 }
