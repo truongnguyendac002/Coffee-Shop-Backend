@@ -37,27 +37,28 @@ public class ShippingAddressService {
         List<ShippingAddressRequest> shippingAddressRequests = new ArrayList<>();
         for (ShippingAddress shippingAddress : shippingAddresses) {
             ShippingAddressRequest shippingAddressRequest = new ShippingAddressRequest();
-            shippingAddressRequest.setRecieverName(shippingAddress.getRecieverName());
-            shippingAddressRequest.setRecieverPhone(shippingAddress.getRecieverPhone());
+            shippingAddressRequest.setId(shippingAddress.getId());
+            shippingAddressRequest.setReceiverName(shippingAddress.getReceiverName());
+            shippingAddressRequest.setReceiverPhone(shippingAddress.getReceiverPhone());
             shippingAddressRequest.setLocation(shippingAddress.getLocation());
             shippingAddressRequests.add(shippingAddressRequest);
         }
         return messageBuilder.buildSuccessMessage(shippingAddressRequests);
     }
 
-    public RespMessage addShippingAddress(long userId, ShippingAddressRequest shippingAddressRequest) {
-        Optional<User> user = userRepository.findById(userId);
+    public RespMessage addShippingAddress(ShippingAddressRequest shippingAddressRequest) {
+        Optional<User> user = userRepository.findById(shippingAddressRequest.getUserId());
         if (user.isPresent()) {
             User user1 = user.get();
             ShippingAddress shippingAddress = new ShippingAddress();
             shippingAddress.setUser(user1);
-            shippingAddress.setRecieverName(shippingAddressRequest.getRecieverName());
-            shippingAddress.setRecieverPhone(shippingAddressRequest.getRecieverPhone());
+            shippingAddress.setReceiverName(shippingAddressRequest.getReceiverName());
+            shippingAddress.setReceiverPhone(shippingAddressRequest.getReceiverPhone());
             shippingAddress.setLocation(shippingAddressRequest.getLocation());
             shippingAddress.setStatus(Status.ACTIVE);
             try {
                 shippingAddressRepository.save(shippingAddress);
-                return messageBuilder.buildSuccessMessage(shippingAddress);
+                return messageBuilder.buildSuccessMessage(shippingAddressRequest);
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[] {"shipping_address"}, "Shipping address could not be saved");
             }
@@ -66,35 +67,57 @@ public class ShippingAddressService {
     }
 
     @Transactional
-    public RespMessage updateShippingAddress(long userId, long shippingAddressId, ShippingAddressRequest shippingAddressRequest) {
-        Optional<Order> order = orderRepository.findByShippingAddressId(shippingAddressId);
+    public RespMessage updateShippingAddress(ShippingAddressRequest shippingAddressRequest) {
+        Optional<Order> order = orderRepository.findByShippingAddressId(shippingAddressRequest.getId());
         if (order.isPresent()) {
-            ShippingAddress shippingAddress = shippingAddressRepository.findById(shippingAddressId).orElse(null);
+            ShippingAddress shippingAddress = shippingAddressRepository.findById(shippingAddressRequest.getId()).orElse(null);
             shippingAddress.setStatus(Status.INACTIVE);
             ShippingAddress newShippingAddress = new ShippingAddress();
-            User user = userRepository.findById(userId).orElse(null);
+            User user = userRepository.findById(shippingAddressRequest.getUserId()).orElse(null);
             newShippingAddress.setUser(user);
-            newShippingAddress.setRecieverName(shippingAddressRequest.getRecieverName());
-            newShippingAddress.setRecieverPhone(shippingAddressRequest.getRecieverPhone());
+            newShippingAddress.setReceiverName(shippingAddressRequest.getReceiverName());
+            newShippingAddress.setReceiverPhone(shippingAddressRequest.getReceiverPhone());
             newShippingAddress.setLocation(shippingAddressRequest.getLocation());
             newShippingAddress.setStatus(Status.ACTIVE);
             try {
                 shippingAddressRepository.save(newShippingAddress);
-                return messageBuilder.buildSuccessMessage(newShippingAddress);
+                return messageBuilder.buildSuccessMessage(shippingAddressRequest);
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[] {"shipping_address"}, "Shipping address could not be saved");
             }
         } else {
-            ShippingAddress shippingAddress = shippingAddressRepository.findById(shippingAddressId).orElse(null);
-            shippingAddress.setRecieverName(shippingAddressRequest.getRecieverName());
-            shippingAddress.setRecieverPhone(shippingAddressRequest.getRecieverPhone());
+            ShippingAddress shippingAddress = shippingAddressRepository.findById(shippingAddressRequest.getId()).orElse(null);
+            shippingAddress.setReceiverName(shippingAddressRequest.getReceiverName());
+            shippingAddress.setReceiverPhone(shippingAddressRequest.getReceiverPhone());
             shippingAddress.setLocation(shippingAddressRequest.getLocation());
             try {
                 shippingAddressRepository.save(shippingAddress);
-                return messageBuilder.buildSuccessMessage(shippingAddress);
+                return messageBuilder.buildSuccessMessage(shippingAddressRequest);
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[] {"shipping_address"}, "Shipping address could not be saved");
             }
         }
+    }
+
+    public RespMessage deleteShippingAddress(long shippingAddressId) {
+        Optional<ShippingAddress> shippingAddress = shippingAddressRepository.findById(shippingAddressId);
+        if (shippingAddress.isPresent()) {
+            ShippingAddress shippingAddress1 = shippingAddress.get();
+            shippingAddress1.setStatus(Status.INACTIVE);
+            ShippingAddressRequest shippingAddressRequest = new ShippingAddressRequest();
+            shippingAddressRequest.setId(shippingAddressId);
+            shippingAddressRequest.setReceiverName(shippingAddressRequest.getReceiverName());
+            shippingAddressRequest.setReceiverPhone(shippingAddressRequest.getReceiverPhone());
+            shippingAddressRequest.setLocation(shippingAddressRequest.getLocation());
+            shippingAddressRequest.setStatus(Status.INACTIVE);
+            shippingAddressRequest.setUserId(shippingAddress1.getUser().getId());
+            try {
+                shippingAddressRepository.save(shippingAddress1);
+                return messageBuilder.buildSuccessMessage(shippingAddressRequest);
+            } catch (CoffeeShopException e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[] {"shipping_address"}, "Shipping address could not be deleted");
+            }
+        }
+        throw new RuntimeException("Shipping address not found");
     }
 }
