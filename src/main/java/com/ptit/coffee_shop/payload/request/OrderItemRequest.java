@@ -19,5 +19,10 @@ public class OrderItemRequest {
     @JsonProperty("Amount")
     private int amount;
 
+    @JsonProperty("Price")
+    private double price;
+
+    @JsonProperty("Discount")
+    private double discount;
 
 }

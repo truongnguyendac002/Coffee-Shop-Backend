@@ -1,5 +1,7 @@
 package com.ptit.coffee_shop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

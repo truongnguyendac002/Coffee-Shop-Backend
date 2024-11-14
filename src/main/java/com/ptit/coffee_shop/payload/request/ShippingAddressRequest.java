@@ -11,22 +11,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ShippingAddressRequest {
-    @JsonProperty("id")
+    @JsonProperty("Id")
     private long id;
 
-    @JsonProperty("reciever_name")
-    private String recieverName;
+    @JsonProperty("ReceiverName")
+    private String receiverName;
 
-    @JsonProperty("reciever_phone")
-    private String recieverPhone;
+    @JsonProperty("ReceiverPhone")
+    private String receiverPhone;
 
-    @JsonProperty("location")
+    @JsonProperty("Location")
     private String location;
 
-    @JsonProperty("status")
+    @JsonProperty("Status")
     private Status status;
 
-    @JsonProperty("user_id")
+    @JsonProperty("UserId")
     private Long userId;
 
 }
