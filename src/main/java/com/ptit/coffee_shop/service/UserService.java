@@ -1,16 +1,21 @@
 package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.UserRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.payload.response.UserDTO;
 import com.ptit.coffee_shop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +29,37 @@ public class UserService {
 
     public RespMessage getAllUsers(){
         List<User> users = userRepository.getAllUser();
-        return messageBuilder.buildSuccessMessage(users);
+        List<UserDTO> userDTOS = new ArrayList<>();
+        for (User user : users) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setName(user.getName());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setPhone(user.getPhone());
+            userDTO.setProfile_img(userDTO.getProfile_img());
+            userDTO.setRoleName("ROLE_USER");
+            userDTO.setStatus(user.getStatus().toString());
+            userDTOS.add(userDTO);
+        }
+        return messageBuilder.buildSuccessMessage(userDTOS);
     }
 
-    public User getUserById(Long userId){
+    public RespMessage getUserById(Long userId){
         Optional<User> userOptional = userRepository.findById(userId);
         if(userOptional.isPresent()) {
-            return userOptional.get();
+            User user = userOptional.get();
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setName(user.getName());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setPhone(user.getPhone());
+            userDTO.setProfile_img(user.getProfile_img());
+            userDTO.setStatus(user.getStatus().toString());
+            userDTO.setRoleName("ROLE_USER");
+            RespMessage respMessage = messageBuilder.buildSuccessMessage(userDTO);
+            return respMessage;
         } else {
-            throw new CoffeeShopException(Constant.NOT_FOUND, null, "User not found with ID: " + userId);
+            throw new RuntimeException("User not found with ID: " + userId);
         }
     }
 
@@ -44,27 +71,51 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User banUser(Long userId){
+    public RespMessage banUser(Long userId){
         Optional<User> optionalUser = userRepository.findById(userId);
         if(optionalUser.isPresent()){
             User user = optionalUser.get();
             user.setStatus(Status.INACTIVE);
-            return userRepository.save(user);
+            UserDTO newUserDTO = new UserDTO();
+            newUserDTO.setId(user.getId());
+            newUserDTO.setName(user.getName());
+            newUserDTO.setEmail(user.getEmail());
+            newUserDTO.setPhone(user.getPhone());
+            newUserDTO.setProfile_img(user.getProfile_img());
+            newUserDTO.setStatus(Status.INACTIVE.toString());
+            try {
+                userRepository.save(user);
+                return messageBuilder.buildSuccessMessage(newUserDTO);
+            } catch (CoffeeShopException e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"User could not be banned");
+            }
         }
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
-    public User unbanUser(Long userId) {
+    public RespMessage unbanUser(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setStatus(Status.ACTIVE);
-            return userRepository.save(user);
+            UserDTO updatedUserDTO = new UserDTO();
+            updatedUserDTO.setId(user.getId());
+            updatedUserDTO.setName(user.getName());
+            updatedUserDTO.setEmail(user.getEmail());
+            updatedUserDTO.setPhone(user.getPhone());
+            updatedUserDTO.setProfile_img(user.getProfile_img());
+            updatedUserDTO.setStatus(Status.ACTIVE.toString());
+            try {
+                userRepository.save(user);
+                return messageBuilder.buildSuccessMessage(updatedUserDTO);
+            }catch (CoffeeShopException e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"User could not be unbanned");
+            }
         }
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
-    public User updateUserInfo(Long userId, UserRequest updatedUser){
+    public RespMessage updateUserInfo(Long userId, UserRequest updatedUser){
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User currentUser = optionalUser.get();
@@ -72,7 +123,12 @@ public class UserService {
             currentUser.setPhone(updatedUser.getPhone());
             currentUser.setUpdated_at(new Date());
             currentUser.setProfile_img(updatedUser.getProfileImg());
-            return userRepository.save(currentUser);
+            try {
+                userRepository.save(currentUser);
+                return messageBuilder.buildSuccessMessage(updatedUser);
+            } catch (CoffeeShopException e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"UserInfo could not be updated");
+            }
         }
         throw new RuntimeException("User not found with ID: " + userId);
     }

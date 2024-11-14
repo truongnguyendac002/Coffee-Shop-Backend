@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,16 +17,17 @@ public class ShippingAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "reciever_name")
-    private String recieverName;
+    @Column(name = "receiver_name")
+    private String receiverName;
 
-    @Column(name = "reciever_phone")
-    private String recieverPhone;
+    @Column(name = "receiver_phone")
+    private String receiverPhone;
 
     @Column(name = "location")
     private String location;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToOne()

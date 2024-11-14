@@ -4,80 +4,70 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.model.ShippingAddress;
 import com.ptit.coffee_shop.payload.request.ShippingAddressRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.ShippingAddressService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/address")
+@RequestMapping("api/address")
+//@PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ROLE_USER')")
 
 public class ShippingAddressController {
+
     private final ShippingAddressService shippingAddressService;
     private final MessageBuilder messageBuilder;
-    @RequestMapping(value = "user/{userId}",method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getShippingAddress(@PathVariable Long userId) {
-        try {
-            RespMessage resp = shippingAddressService.getShippingAddress(userId);
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
-        } catch (CoffeeShopException e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<String> getUserShippingAddress(@PathVariable long userId) {
+        RespMessage respMessage = shippingAddressService.getUserShippingAddresses(userId);
+        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "",method = RequestMethod.POST, produces = "application/json")
+    @PostMapping("/add")
     public ResponseEntity<String> addShippingAddress(@RequestBody ShippingAddressRequest shippingAddressRequest) {
         try {
-            RespMessage resp = shippingAddressService.addShippingAddress(shippingAddressRequest);
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+            RespMessage respMessage = shippingAddressService.addShippingAddress(shippingAddressRequest);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch (CoffeeShopException e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 
-    @RequestMapping(value = "",method = RequestMethod.PUT, produces = "application/json")
+    @PutMapping("/update")
     public ResponseEntity<String> updateShippingAddress(@RequestBody ShippingAddressRequest shippingAddressRequest) {
         try {
-            RespMessage resp = shippingAddressService.updateShippingAddress(shippingAddressRequest);
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+            RespMessage respMessage = shippingAddressService.updateShippingAddress(shippingAddressRequest);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch (CoffeeShopException e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @RequestMapping(value = "/{id}",method = RequestMethod.DELETE)
-    public ResponseEntity<String> deleteShippingAddress(@PathVariable Long id) {
+    @PutMapping("/delete/{shippingAddressId}")
+    public ResponseEntity<String> deleteShippingAddress(@PathVariable long shippingAddressId) {
         try {
-            RespMessage resp = shippingAddressService.deleteShippingAddress(id);
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+            RespMessage message = shippingAddressService.deleteShippingAddress(shippingAddressId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(message), HttpStatus.OK);
         } catch (CoffeeShopException e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
-            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
-            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
         }
     }
 }

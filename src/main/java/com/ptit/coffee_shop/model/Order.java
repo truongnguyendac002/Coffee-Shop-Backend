@@ -1,6 +1,8 @@
 package com.ptit.coffee_shop.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ptit.coffee_shop.common.enums.OrderStatus;
+import com.ptit.coffee_shop.common.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +22,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -30,4 +32,8 @@ public class Order {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @Column(name = "payment_method")
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
 }
