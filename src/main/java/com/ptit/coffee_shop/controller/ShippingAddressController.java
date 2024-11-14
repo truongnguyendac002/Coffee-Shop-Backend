@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/address")
-//@PreAuthorize("hasRole('USER')")
+@PreAuthorize("hasRole('USER')")
 @RequiredArgsConstructor
 
 public class ShippingAddressController {
