@@ -57,4 +57,13 @@ public class ShippingAddressService {
         shippingAddressRepository.save(shippingAddress);
         return messageBuilder.buildSuccessMessage(shippingAddress);
     }
+
+    public RespMessage deleteShippingAddress(Long id) {
+        Optional<ShippingAddress> shippingAddressOptional = shippingAddressRepository.findById(id);
+        if (shippingAddressOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.NOT_FOUND, null, "Shipping address not found with ID: " + id);
+        }
+        shippingAddressRepository.deleteById(id);
+        return messageBuilder.buildSuccessMessage("Delete shipping address (id: " + id + ") successfully");
+    }
 }

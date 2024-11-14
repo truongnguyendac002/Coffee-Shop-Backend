@@ -65,4 +65,19 @@ public class ShippingAddressController {
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @RequestMapping(value = "/{id}",method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteShippingAddress(@PathVariable Long id) {
+        try {
+            RespMessage resp = shippingAddressService.deleteShippingAddress(id);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
