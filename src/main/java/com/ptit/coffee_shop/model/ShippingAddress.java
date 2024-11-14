@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "shipping_address")
-
 public class ShippingAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +30,12 @@ public class ShippingAddress {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) status = Status.ACTIVE;
+    }
 }

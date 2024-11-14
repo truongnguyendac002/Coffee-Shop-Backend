@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -129,4 +130,34 @@ public class AuthService {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"Token"}, "Token is null or not valid");
         }
     }
+
+    public RespMessage refreshAccessToken(String refreshToken) {
+
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RefreshToken"}, "Refresh token is missing or invalid");
+        }
+
+        refreshToken = refreshToken.substring(7);
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"RefreshToken"}, "Invalid refresh token");
+        }
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found for provided refresh token"));
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(username);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
+
+        return RespMessage.builder()
+                .respCode("000")
+                .respDesc("Access token refreshed successfully")
+                .data(Map.of(
+                        "accessToken", newAccessToken,
+                        "refreshToken", newRefreshToken
+                ))
+                .build();
+    }
+
 }

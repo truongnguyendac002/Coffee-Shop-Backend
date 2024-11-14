@@ -97,5 +97,32 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException ex) {
             throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT claims string is empty.");
         }
+        catch (Exception ex) {
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "JWT token is invalid: " + ex.getMessage());
+        }
     }
+    public String generateAccessToken(String username) {
+        Date currentDate = new Date();
+        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(currentDate)
+                .setExpiration(expireDate)
+                .signWith(key())
+                .compact();
+    }
+    public String generateRefreshToken(String username) {
+        Date currentDate = new Date();
+        Date refreshExpireDate = new Date(currentDate.getTime() + jwtRefreshExpirationDate);
+
+
+        return  Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(currentDate)
+                .setExpiration(refreshExpireDate)
+                .signWith(key()) // Use a method to retrieve your secret key
+                .compact();
+    }
+
 }

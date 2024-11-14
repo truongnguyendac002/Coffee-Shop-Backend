@@ -11,10 +11,8 @@ import com.ptit.coffee_shop.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/auth")
@@ -52,7 +50,7 @@ public class AuthController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(value = "/user-details", method = RequestMethod.GET)
     public ResponseEntity<String> getAccount() {
         try {
             RespMessage response = authService.getProfileByToken();
@@ -61,6 +59,12 @@ public class AuthController {
             RespMessage response = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(response), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<RespMessage> refreshAccessToken(@RequestHeader("Authorization") String refreshToken) {
+        RespMessage response = authService.refreshAccessToken(refreshToken);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
