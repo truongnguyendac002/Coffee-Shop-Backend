@@ -28,7 +28,7 @@ public class ShippingAddress {
     @Column(name = "status")
     private Status status;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;
 
