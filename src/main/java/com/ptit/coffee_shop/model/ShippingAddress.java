@@ -2,6 +2,7 @@ package com.ptit.coffee_shop.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.payload.response.ShippingAddressResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,5 +38,10 @@ public class ShippingAddress {
     @PrePersist
     public void prePersist() {
         if (status == null) status = Status.ACTIVE;
+    }
+
+
+    public ShippingAddressResponse toResponse() {
+        return new ShippingAddressResponse(id, receiverName, receiverPhone, location, status, user.getId());
     }
 }

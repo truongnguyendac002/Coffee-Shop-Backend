@@ -33,7 +33,7 @@ public class UserController {
         return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
 
-    @PutMapping("/ban/{userId}")
+    @PutMapping("/{userId}/ban")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> banUser(@PathVariable Long userId) {
         try {
@@ -48,7 +48,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/unban/{userId}")
+    @PutMapping("/{userId}/unban")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> unbanUser(@PathVariable Long userId) {
         try {
@@ -63,7 +63,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update-profile/{userId}")
+    @PutMapping("/{userId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> updateUserProfile(@PathVariable Long userId, @RequestBody UserRequest updatedUser) {
         try {
