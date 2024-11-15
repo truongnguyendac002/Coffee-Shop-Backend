@@ -25,7 +25,7 @@ public class Order {
     @OneToMany(cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "shipping_address_id")
     private ShippingAddress shippingAddress;
 

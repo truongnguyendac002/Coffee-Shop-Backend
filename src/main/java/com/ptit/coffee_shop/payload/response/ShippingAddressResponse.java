@@ -1,4 +1,4 @@
-package com.ptit.coffee_shop.payload.request;
+package com.ptit.coffee_shop.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ptit.coffee_shop.common.enums.Status;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-public class ShippingAddressRequest {
+public class ShippingAddressResponse {
     @JsonProperty("id")
     private long id;
 
@@ -28,5 +27,4 @@ public class ShippingAddressRequest {
 
     @JsonProperty("user_id")
     private Long userId;
-
 }
