@@ -7,6 +7,7 @@ import com.ptit.coffee_shop.model.CartItem;
 import com.ptit.coffee_shop.model.ProductItem;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.CartItemRequest;
+import com.ptit.coffee_shop.payload.response.CartItemResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.CartItemRepository;
 import com.ptit.coffee_shop.repository.ProductItemRepository;
@@ -15,7 +16,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,12 +70,34 @@ public class CartService {
         }
     }
 
+//    public RespMessage getCartItems(Long userId) {
+//        if (userId <= 0) {
+//            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"UserId"}, "UserId invalid");
+//        }
+//        try {
+//            return messageBuilder.buildSuccessMessage(cartItemRepository.findByUserId(userId));
+//        } catch (Exception e) {
+//            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Get Cart Item failed");
+//        }
+//    }
     public RespMessage getCartItems(Long userId) {
         if (userId <= 0) {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"UserId"}, "UserId invalid");
         }
         try {
-            return messageBuilder.buildSuccessMessage(cartItemRepository.findByUserId(userId));
+
+            List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
+
+            List<CartItemResponse> cartItemResponses = cartItems.stream().map(cartItem ->
+                    new CartItemResponse(
+                            cartItem.getId(),
+                            cartItem.getProductItem(),
+                            cartItem.getQuantity(),
+                            cartItem.getUser().getId()
+                    )
+            ).collect(Collectors.toList());
+
+            return messageBuilder.buildSuccessMessage(cartItemResponses);
         } catch (Exception e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Get Cart Item failed");
         }
