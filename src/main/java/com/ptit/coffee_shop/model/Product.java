@@ -43,6 +43,7 @@ public class Product {
     private Brand brand;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @PrePersist

@@ -41,5 +41,9 @@ public class BrandController {
 
     }
 
-
+    @RequestMapping(value = "/all" , method = RequestMethod.GET , produces = "application/json")
+    public ResponseEntity<RespMessage> getAllBrand () {
+        RespMessage respMessage = productService.getAllBrand();
+        return new ResponseEntity<>(respMessage, HttpStatus.OK);
+    }
 }

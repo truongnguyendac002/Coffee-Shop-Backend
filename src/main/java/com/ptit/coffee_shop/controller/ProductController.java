@@ -24,52 +24,59 @@ public class ProductController {
     private final ProductService productService;
     private final MessageBuilder messageBuilder;
 
-    @RequestMapping(value = "/all-product", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> getAllProducts() {
         RespMessage respMessage = productService.getAllProduct();
         return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
+
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> addProduct(@RequestBody ProductRequest request) {
         try {
             RespMessage respMessage = productService.addProduct(request);
-            return  new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
-        }
-        catch (CoffeeShopException e) {
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT, produces = "application/json")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateProduct() {
         return ResponseEntity.ok("Hello");
     }
 
-    @RequestMapping(value = "", method = RequestMethod.DELETE, produces = "application/json")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> deleteProduct() {
-        return ResponseEntity.ok("Hello");
-    }
-
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<RespMessage> getProduct(@PathVariable Long id) {
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         try {
-            RespMessage respMessage = productService.getProductById(id) ;
-            return new ResponseEntity<>(respMessage, HttpStatus.OK);
+            RespMessage respMessage = productService.deleteProduct(id);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         }
         catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
-            return new ResponseEntity<>(respMessage, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        catch (Exception e) {
+
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<RespMessage> getProduct(@PathVariable Long id) {
+        try {
+            RespMessage respMessage = productService.getProductById(id);
+            return new ResponseEntity<>(respMessage, HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(respMessage, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
             return new ResponseEntity<>(respMessage, HttpStatus.INTERNAL_SERVER_ERROR);
         }

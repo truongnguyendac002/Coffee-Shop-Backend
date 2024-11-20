@@ -26,26 +26,18 @@ public class ProductItemController {
     public final ProductItemService productItemService;
     public final MessageBuilder messageBuilder;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getProductItems() {
-        return ResponseEntity.ok("Hello");
-    }
-
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addProductItem(@RequestBody ProductItemRequest request) {
         try {
             RespMessage respMessage = productItemService.addProductItem(request);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
-        }
-        catch (CoffeeShopException e) {
+        } catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
     @RequestMapping(value = "", method = RequestMethod.PUT, produces = "application/json")
@@ -60,7 +52,7 @@ public class ProductItemController {
 
     @RequestMapping(value = "/{productId}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<RespMessage> getProductItem(@PathVariable long productId) {
-        RespMessage respMessage= productItemService.getProductItem(productId);
+        RespMessage respMessage = productItemService.getProductItem(productId);
         return new ResponseEntity<>(respMessage, HttpStatus.OK);
     }
 }

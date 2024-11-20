@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,9 +25,6 @@ public class ProductItemService {
     public final ProductRepository productRepository;
     public final TypeProductRepository typeProductRepository;
     public final MessageBuilder messageBuilder;
-    public String getProductItems() {
-        return "Hello";
-    }
 
     public RespMessage addProductItem(ProductItemRequest request) {
         if (request.getPrice() < 0) {
@@ -78,15 +74,5 @@ public class ProductItemService {
         return messageBuilder.buildSuccessMessage(productItemRepository.findByProductId(productId));
 
     }
-
-
-    public String updateProductItem() {
-        return "Hello";
-    }
-
-    public String deleteProductItem() {
-        return "Hello";
-    }
-
 
 }

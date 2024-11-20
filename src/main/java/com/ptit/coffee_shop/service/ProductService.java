@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.Brand;
@@ -31,7 +32,8 @@ public class ProductService {
 
     public RespMessage getAllProduct() {
         List<Product> products = productRepository.findAll();
-        return messageBuilder.buildSuccessMessage(products);
+        List<Product> activeProducts = products.stream().filter(product -> product.getStatus() == Status.ACTIVE).toList();
+        return messageBuilder.buildSuccessMessage(activeProducts);
     }
 
     public RespMessage getProductById(Long id) {
@@ -39,7 +41,7 @@ public class ProductService {
         if (product.isPresent()) {
             return messageBuilder.buildSuccessMessage(product.get());
         } else {
-            throw new CoffeeShopException( Constant.FIELD_NOT_FOUND , new Object[] {"product"} , "Product not found");
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
         }
     }
 
@@ -77,7 +79,7 @@ public class ProductService {
     }
 
     @Transactional
-    public RespMessage addCategory(String name , String description) {
+    public RespMessage addCategory(String name, String description) {
         if (name == null || name.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Category name must be not null");
         }
@@ -102,7 +104,7 @@ public class ProductService {
     @Transactional
     public RespMessage getAllCategory() {
         List<Category> categories = categoryRepository.findAll();
-        return  messageBuilder.buildSuccessMessage(categories);
+        return messageBuilder.buildSuccessMessage(categories);
     }
 
 
@@ -142,4 +144,19 @@ public class ProductService {
         return messageBuilder.buildSuccessMessage(typeProduct);
     }
 
+    public RespMessage getAllBrand() {
+        List<Brand> brands = brandRepository.findAll();
+        return messageBuilder.buildSuccessMessage(brands);
+    }
+
+    public RespMessage deleteProduct(Long id) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
+        }
+        Product product = productOptional.get();
+        product.setStatus(Status.INACTIVE);
+        productRepository.save(product);
+        return messageBuilder.buildSuccessMessage(product);
+    }
 }
