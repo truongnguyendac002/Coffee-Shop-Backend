@@ -34,6 +34,16 @@ public class ProductService {
         return messageBuilder.buildSuccessMessage(products);
     }
 
+    public RespMessage getProductById(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            return messageBuilder.buildSuccessMessage(product.get());
+        } else {
+            throw new CoffeeShopException( Constant.FIELD_NOT_FOUND , new Object[] {"product"} , "Product not found");
+        }
+    }
+
+
     public RespMessage addProduct(ProductRequest productRequest) {
         if (productRequest.getName() == null || productRequest.getName().isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Product name must be not null");
