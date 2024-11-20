@@ -161,11 +161,6 @@ public class ProductService {
         return messageBuilder.buildSuccessMessage(typeProduct);
     }
 
-    public RespMessage getAllBrand() {
-        List<Brand> brands = brandRepository.findAll();
-        return messageBuilder.buildSuccessMessage(brands);
-    }
-
     public RespMessage deleteProduct(Long id) {
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isEmpty()) {
@@ -175,5 +170,40 @@ public class ProductService {
         product.setStatus(Status.INACTIVE);
         productRepository.save(product);
         return messageBuilder.buildSuccessMessage(product);
+    }
+
+    public RespMessage updateProduct(Long id, ProductRequest request) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
+        }
+        Product product = productOptional.get();
+        if (request.getName() != null && !request.getName().isEmpty()) {
+            product.setName(request.getName());
+        }
+        if (request.getDescription() != null && !request.getDescription().isEmpty()) {
+            product.setDescription(request.getDescription());
+        }
+        if (request.getCategoryId() > 0) {
+            Optional<Category> categoryOptional = categoryRepository.findById(request.getCategoryId());
+            if (categoryOptional.isEmpty()) {
+                throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"categoryId"}, "Category not found");
+            }
+            product.setCategory(categoryOptional.get());
+        }
+        if (request.getBrandId() > 0) {
+            Optional<Brand> brandOptional = brandRepository.findById(request.getBrandId());
+            if (brandOptional.isEmpty()) {
+                throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"brandId"}, "Brand not found");
+            }
+            product.setBrand(brandOptional.get());
+        }
+        productRepository.save(product);
+        return messageBuilder.buildSuccessMessage(product);
+    }
+
+    public RespMessage getAllTypeProduct() {
+        List<TypeProduct> typeProducts = typeProductRepository.findAll();
+        return messageBuilder.buildSuccessMessage(typeProducts);
     }
 }

@@ -4,7 +4,6 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
-import com.ptit.coffee_shop.model.ProductItem;
 import com.ptit.coffee_shop.payload.request.ProductItemRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.ProductItemService;

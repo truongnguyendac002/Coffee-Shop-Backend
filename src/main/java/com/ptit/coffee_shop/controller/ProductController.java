@@ -42,10 +42,19 @@ public class ProductController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<String> updateProduct() {
-        return ResponseEntity.ok("Hello");
+    public ResponseEntity<String> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
+        try {
+            RespMessage respMessage = productService.updateProduct(id, request);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
