@@ -5,6 +5,7 @@ import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.service.BrandService;
 import com.ptit.coffee_shop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class BrandController {
     private final ProductService productService;
     private final MessageBuilder messageBuilder;
+    private final BrandService brandService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addBrand(@RequestBody Map<String, String> payload) {
@@ -41,5 +43,10 @@ public class BrandController {
 
     }
 
+    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<String> getAllBrand() {
+        RespMessage respMessage = brandService.getAllBrands();
+        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+    }
 
 }
