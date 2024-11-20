@@ -1,17 +1,27 @@
 package com.ptit.coffee_shop.service;
 
-import com.ptit.coffee_shop.common.GsonUtil;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.config.OnlinePaymentConfig;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.model.Order;
+import com.ptit.coffee_shop.model.Transaction;
 import com.ptit.coffee_shop.payload.response.PaymentResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.repository.OrderRepository;
+import com.ptit.coffee_shop.repository.TransactionRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -22,6 +32,12 @@ public class OnlinePaymentService {
 
     @Autowired
     private MessageBuilder messageBuilder;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     public RespMessage createVNPayPayment(int amount, HttpServletRequest request) {
         if (amount <= 0) {
@@ -95,30 +111,122 @@ public class OnlinePaymentService {
         }
     }
 
-//    public boolean verifyVNPayReturn(Map<String, String> fields, String vnp_SecureHash) {
-//        fields.remove("vnp_SecureHash");
-//        String hashData = OnlinePaymentConfig.hashAllFields(fields);
-//        return vnp_SecureHash.equals(hashData);
-//    }
-
-    public RespMessage handleVNPayReturn(HttpServletRequest request) {
-        Map<String, String> fields = new HashMap<>();
-        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
-            String paramName = params.nextElement();
-            String paramValue = request.getParameter(paramName);
-            if ((paramValue != null) && (!paramValue.isEmpty())) {
-                fields.put(paramName, paramValue);
-            }
-        }
-
-        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-        fields.remove("vnp_SecureHash");
-
-        String hashData = OnlinePaymentConfig.hashAllFields(fields);
-        if (vnp_SecureHash.equals(hashData)) {
-            return messageBuilder.buildSuccessMessage(vnp_SecureHash);
+    public RedirectView handleVNPayReturn(HttpServletRequest request){
+        String responseCode = request.getParameter("vnp_ResponseCode");
+        RedirectView redirectView = new RedirectView();
+        if(responseCode.equals("00")) {
+            redirectView.setUrl("http://localhost:3000/payment-success"
+                        + "?txnRef=" + request.getParameter("vnp_TxnRef")
+                        + "&transactionNo=" + request.getParameter("vnp_TransactionNo")
+                        + "&amount=" + request.getParameter("vnp_Amount")
+                        + "&payDate=" + request.getParameter("vnp_PayDate")
+            );
         } else {
-            throw new RuntimeException("VNP Secure Hash does not match");
+            redirectView.setUrl("http://localhost:3000/payment-failure"
+                    + "?txnRef=" + request.getParameter("vnp_TxnRef"));
+        }
+        return redirectView;
+    }
+
+    @Transactional
+    public RespMessage handleVNPayRefund(long transactionId, HttpServletRequest request) {
+        try {
+            String vnp_RequestId = OnlinePaymentConfig.getRandomNumber(8);
+            Transaction transaction = transactionRepository.getOne(transactionId);
+            String vnp_TxnRef = transaction.getTxnRef();
+
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            String vnp_TransactionDate = formatter.format(cld.getTime());
+            String vnp_CreateDate = formatter.format(transaction.getPayDate());
+            String vnp_IpAddr = OnlinePaymentConfig.getIpAddress(request);
+            String vnp_Amount = String.valueOf((int) (transaction.getAmount()*100));
+            String vnp_TransactionNo = transaction.getTransactionNo();
+            String vnp_CreateBy = transaction.getUser().getName();
+            String vnp_OrderInfo = "Hoan tien GD OrderId:" + vnp_TxnRef;
+
+
+            JsonObject vnp_Params = new JsonObject ();
+            vnp_Params.addProperty("vnp_RequestId", vnp_RequestId);
+            vnp_Params.addProperty("vnp_Version", OnlinePaymentConfig.vnp_Version);
+            vnp_Params.addProperty("vnp_Command", OnlinePaymentConfig.vnp_Refund);
+            vnp_Params.addProperty("vnp_TmnCode", OnlinePaymentConfig.vnp_TmnCode);
+            vnp_Params.addProperty("vnp_TransactionType", OnlinePaymentConfig.vnp_TransactionType);
+            vnp_Params.addProperty("vnp_TxnRef", vnp_TxnRef);
+            vnp_Params.addProperty("vnp_Amount", vnp_Amount);
+            vnp_Params.addProperty("vnp_OrderInfo", vnp_OrderInfo);
+            vnp_Params.addProperty("vnp_TransactionNo", vnp_TransactionNo);
+            vnp_Params.addProperty("vnp_TransactionDate", vnp_TransactionDate);
+            vnp_Params.addProperty("vnp_CreateBy", vnp_CreateBy);
+            vnp_Params.addProperty("vnp_CreateDate", vnp_CreateDate);
+            vnp_Params.addProperty("vnp_IpAddr", vnp_IpAddr);
+
+            String hash_Data= String.join("|", vnp_RequestId, OnlinePaymentConfig.vnp_Version, OnlinePaymentConfig.vnp_Refund, OnlinePaymentConfig.vnp_TmnCode,
+                    OnlinePaymentConfig.vnp_TransactionType, vnp_TxnRef, vnp_Amount, vnp_TransactionNo, vnp_TransactionDate,
+                    vnp_CreateBy, vnp_CreateDate, vnp_IpAddr, vnp_OrderInfo);
+
+            String vnp_SecureHash = OnlinePaymentConfig.hmacSHA512(OnlinePaymentConfig.secretKey, hash_Data.toString());
+
+            vnp_Params.addProperty("vnp_SecureHash", vnp_SecureHash);
+
+            URL url = new URL(OnlinePaymentConfig.vnp_ApiUrl);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
+
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(vnp_Params.toString());
+            wr.flush();
+            wr.close();
+
+            int responseCode = con.getResponseCode();
+            System.out.println("Sending 'POST' request to URL : " + url);
+            System.out.println("Post Data : " + vnp_Params);
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String output;
+            StringBuilder response = new StringBuilder();
+            while ((output = in.readLine()) != null) {
+                response.append(output);
+            }
+            in.close();
+
+            System.out.println("Response: " + response);
+
+            JsonObject jsonResponse = JsonParser.parseString(response.toString()).getAsJsonObject();
+
+            String vnp_ResponseCode = jsonResponse.get("vnp_ResponseCode").getAsString();
+
+            if (vnp_ResponseCode.equals("00")) {
+                Transaction transaction1 = new Transaction();
+                transaction1.setTxnRef(vnp_TxnRef);
+                transaction1.setTransactionNo(vnp_TransactionNo);
+                transaction1.setPayDate(new Date());
+                transaction1.setAmount(transaction.getAmount());
+                transaction1.setCommand("refund");
+                transaction1.setOrder(transaction.getOrder());
+                transaction1.setUser(transaction.getUser());
+                Optional<Order> order = orderRepository.findById(transaction.getOrder().getId());
+                if (order.isPresent()) {
+                    Order order1 = order.get();
+                    order1.setStatus(OrderStatus.Cancelled);
+                    try {
+                        orderRepository.save(order1);
+                        transactionRepository.save(transaction1);
+                        return messageBuilder.buildSuccessMessage(transaction1);
+                    } catch (CoffeeShopException e ){
+                        throw new CoffeeShopException(Constant.SYSTEM_ERROR,null, "Cannot save transaction");
+                    }
+                } else {
+                    throw new CoffeeShopException(Constant.NOT_FOUND,null, "No order found");
+                }
+            } else {
+                throw new Exception("Transaction not found");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error in sending request");
         }
     }
 }

@@ -47,7 +47,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/add-order")
+    @PostMapping("")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> addOrder(@RequestBody OrderRequest orderRequest) {
         try {
@@ -62,7 +62,7 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/update-status/{orderId}")
+    @PutMapping("/{orderId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateOrderStatus(@PathVariable long orderId) {
         try {

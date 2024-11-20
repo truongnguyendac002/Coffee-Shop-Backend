@@ -13,14 +13,15 @@ import java.util.*;
 public class OnlinePaymentConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay_jsp/vnpay_return.jsp";
+    public static String vnp_ReturnUrl = "http://localhost:8080/api/payment/return";
     public static String vnp_TmnCode = "W431Y266";
     public static String secretKey = "X1PG8L1HUG4QXOIFFL81QXUATCO1XXCN";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
     public static String orderType = "other";
-
+    public static String vnp_Refund = "refund";
+    public static String vnp_TransactionType = "02";
 
 
     public static String md5(String message) {
