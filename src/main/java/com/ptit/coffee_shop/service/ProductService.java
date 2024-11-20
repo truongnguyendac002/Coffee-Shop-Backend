@@ -45,6 +45,22 @@ public class ProductService {
         }
     }
 
+    // Tìm kiếm sản phẩm theo từ khóa và trả về RespMessage
+    public RespMessage searchProductsByKeyword(String keyword) {
+        try {
+            List<Product> products = productRepository.searchByKeyword(keyword);
+            if (products.isEmpty()) {
+                // Xây dựng phản hồi thất bại nếu không tìm thấy sản phẩm
+                return messageBuilder.buildFailureMessage(Constant.FIELD_NOT_FOUND, null, null);
+            }
+            // Xây dựng phản hồi thành công nếu tìm thấy sản phẩm
+            return messageBuilder.buildSuccessMessage(products);
+        } catch (Exception e) {
+            // Xây dựng phản hồi thất bại khi có lỗi
+            return messageBuilder.buildFailureMessage(Constant.SYSTEM_ERROR, null, null);
+        }
+    }
+
 
     public RespMessage addProduct(ProductRequest productRequest) {
         if (productRequest.getName() == null || productRequest.getName().isEmpty()) {
@@ -70,6 +86,7 @@ public class ProductService {
         product.setDescription(productRequest.getDescription());
         product.setCategory(categoryOptional.get());
         product.setBrand(brandOptional.get());
+        product.setPrice(productRequest.getPrice());
         try {
             productRepository.save(product);
         } catch (Exception e) {

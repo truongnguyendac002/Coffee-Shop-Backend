@@ -5,6 +5,7 @@ import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.service.BrandService;
 import com.ptit.coffee_shop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class BrandController {
     private final ProductService productService;
     private final MessageBuilder messageBuilder;
+    private final BrandService brandService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addBrand(@RequestBody Map<String, String> payload) {
@@ -29,21 +31,21 @@ public class BrandController {
         try {
             RespMessage respMessage = productService.addBrand(name);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
-        }
-        catch (CoffeeShopException e) {
+        } catch (CoffeeShopException e) {
             RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
         }
 
     }
 
-    @RequestMapping(value = "/all" , method = RequestMethod.GET , produces = "application/json")
-    public ResponseEntity<RespMessage> getAllBrand () {
-        RespMessage respMessage = productService.getAllBrand();
-        return new ResponseEntity<>(respMessage, HttpStatus.OK);
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<String> getAllBrand() {
+        RespMessage respMessage = brandService.getAllBrands();
+        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
+
 }

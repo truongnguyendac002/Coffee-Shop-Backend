@@ -6,6 +6,8 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.config.OnlinePaymentConfig;
+import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.model.Transaction;
 import com.ptit.coffee_shop.payload.response.PaymentResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.OnlinePaymentService;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.Console;
 import java.io.UnsupportedEncodingException;
@@ -32,7 +35,7 @@ public class OnlinePaymentController {
     private final MessageBuilder messageBuilder;
     private final OnlinePaymentService onlinePaymentService;
 
-    @PostMapping("/create-payment")
+    @RequestMapping(value = "",method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> createOnlinePayment(@RequestParam("amount") int amount, HttpServletRequest request ) {
         try {
             RespMessage respMessage = onlinePaymentService.createVNPayPayment(amount,request);
@@ -43,16 +46,23 @@ public class OnlinePaymentController {
         }
     }
 
-    @GetMapping("/vnpay-return")
-    public ResponseEntity<String> handleVNPayReturn(HttpServletRequest request) {
+    @RequestMapping(value = "/return",method = RequestMethod.GET, produces = "application/json")
+    public RedirectView handleVNPayReturn(HttpServletRequest request) {
+        return onlinePaymentService.handleVNPayReturn(request);
+    }
+
+    @RequestMapping(value = "",method = RequestMethod.POST, produces = "application/json")
+    public ResponseEntity<String> handleVNPayRefund(@RequestParam long transactionId, HttpServletRequest request) {
         try {
-            RespMessage respMessage = onlinePaymentService.handleVNPayReturn(request);
+            RespMessage respMessage = onlinePaymentService.handleVNPayRefund(transactionId, request);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(),e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.SYSTEM_ERROR, null, e.getMessage());
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 }

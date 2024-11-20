@@ -11,6 +11,7 @@ import com.ptit.coffee_shop.model.ProductItem;
 import com.ptit.coffee_shop.model.ShippingAddress;
 import com.ptit.coffee_shop.payload.request.OrderItemRequest;
 import com.ptit.coffee_shop.payload.request.OrderRequest;
+import com.ptit.coffee_shop.payload.response.OrderResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.OrderItemRepository;
 import com.ptit.coffee_shop.repository.OrderRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +42,6 @@ public class OrderService {
 
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-//        List<OrderItem> orderItems = orders.getFirst().getOrderItems();
         return messageBuilder.buildSuccessMessage(orders);
     }
 
@@ -48,7 +49,15 @@ public class OrderService {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (orderOptional.isPresent()) {
             Order order = orderOptional.get();
-            return messageBuilder.buildSuccessMessage(order);
+            List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+            OrderResponse orderResponse = new OrderResponse();
+            orderResponse.setOrderId(order.getId());
+            orderResponse.setOrderDate(order.getOrderDate());
+            orderResponse.setOrderItems(orderItems);
+            orderResponse.setOrderStatus(order.getStatus().toString());
+            orderResponse.setShippingAddress(order.getShippingAddress());
+            orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
+            return messageBuilder.buildSuccessMessage(orderResponse);
         }
         throw new RuntimeException("Order not found");
     }
@@ -68,6 +77,9 @@ public class OrderService {
         }
         Order order = new Order();
         order.setShippingAddress(shippingAddress.get());
+        order.setPaymentMethod(orderRequest.getPaymentMethod());
+        order.setStatus(OrderStatus.Processing);
+        order.setOrderDate(new Date());
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemRequest orderItemRequest : orderRequest.getOrderItems()) {
             long productItemId = orderItemRequest.getProductItemId();
@@ -85,17 +97,21 @@ public class OrderService {
             }
             OrderItem orderItem = new OrderItem();
             orderItem.setProductItem(productItemOptional.get());
-            orderItem.setAmount(orderItem.getAmount());
+            orderItem.setPrice(orderItemRequest.getPrice());
+            orderItem.setDiscount(orderItemRequest.getDiscount());
+            orderItem.setAmount(orderItemRequest.getAmount());
             orderItems.add(orderItem);
         }
-        order.setOrderItems(orderItems);
-        order.setStatus(OrderStatus.Processing);
         try {
-            orderRepository.save(order);
+            Order order1 = orderRepository.save(order);
+            for (OrderItem orderItem : orderItems) {
+                orderItem.setOrder(order1);
+                orderItemRepository.save(orderItem);
+            }
+            return messageBuilder.buildSuccessMessage(order1);
         } catch (Exception e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"order"}, "Order can not be added");
         }
-        return messageBuilder.buildSuccessMessage(order);
     }
 
     public RespMessage updateOrderStatus(long orderId) {
