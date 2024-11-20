@@ -1,7 +1,6 @@
 package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
-import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
@@ -11,8 +10,6 @@ import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.payload.response.UserDTO;
 import com.ptit.coffee_shop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -56,8 +53,7 @@ public class UserService {
             userDTO.setProfile_img(user.getProfile_img());
             userDTO.setStatus(user.getStatus().toString());
             userDTO.setRoleName("ROLE_USER");
-            RespMessage respMessage = messageBuilder.buildSuccessMessage(userDTO);
-            return respMessage;
+            return messageBuilder.buildSuccessMessage(userDTO);
         } else {
             throw new RuntimeException("User not found with ID: " + userId);
         }
@@ -65,10 +61,6 @@ public class UserService {
 
     public Optional<User> getUserByEmail(String email){
         return userRepository.findByEmail(email);
-    }
-
-    public User saveUser(User user){
-        return userRepository.save(user);
     }
 
     public RespMessage banUser(Long userId){

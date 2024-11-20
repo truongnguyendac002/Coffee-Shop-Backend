@@ -43,7 +43,7 @@ public class CategoryController {
 
     }
 
-    @RequestMapping(value = "/all-category" , method = RequestMethod.GET , produces = "application/json")
+    @RequestMapping(value = "/all" , method = RequestMethod.GET , produces = "application/json")
     public ResponseEntity<RespMessage> getAllCategory () {
         RespMessage respMessage = productService.getAllCategory();
         return new ResponseEntity<>(respMessage, HttpStatus.OK);

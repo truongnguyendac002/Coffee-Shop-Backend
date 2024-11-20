@@ -34,4 +34,15 @@ public class TypeProductController {
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<String> getAllTypeProduct() {
+        try {
+            RespMessage respMessage = productService.getAllTypeProduct();
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

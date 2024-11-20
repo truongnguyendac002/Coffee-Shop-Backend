@@ -3,6 +3,7 @@ package com.ptit.coffee_shop.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.payload.response.ProfileResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -84,4 +85,13 @@ public class User implements UserDetails {
         return status.equals(Status.ACTIVE);
     }
 
+    public ProfileResponse toProfileResponse() {
+        return ProfileResponse.builder()
+                .email(email)
+                .name(name)
+                .phone(phone)
+                .profile_img(profile_img)
+                .created_at(created_at)
+                .build();
+    }
 }

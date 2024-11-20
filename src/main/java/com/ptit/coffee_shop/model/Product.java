@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -43,7 +44,11 @@ public class Product {
     private Brand brand;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
     @PrePersist
     public void prePersist() {
