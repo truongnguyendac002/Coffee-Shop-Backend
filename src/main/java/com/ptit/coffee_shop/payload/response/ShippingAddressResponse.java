@@ -10,21 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShippingAddressResponse {
-    @JsonProperty("id")
     private long id;
-
-    @JsonProperty("receiver_name")
     private String receiverName;
-
-    @JsonProperty("receiver_phone")
     private String receiverPhone;
-
-    @JsonProperty("location")
     private String location;
-
-    @JsonProperty("status")
     private Status status;
-
-    @JsonProperty("user_id")
     private Long userId;
 }
