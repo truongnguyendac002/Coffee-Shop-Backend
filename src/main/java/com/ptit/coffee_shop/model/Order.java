@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,9 +23,6 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems;
-
     @OneToOne
     @JoinColumn(name = "shipping_address_id")
     private ShippingAddress shippingAddress;
@@ -32,6 +30,9 @@ public class Order {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @Column(name = "order_date")
+    private Date orderDate;
 
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
