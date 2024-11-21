@@ -39,14 +39,32 @@ public class ProductItemController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.PUT, produces = "application/json")
-    public ResponseEntity<String> updateProductItem() {
-        return ResponseEntity.ok("Hello");
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = "application/json")
+    public ResponseEntity<String> updateProductItem(@PathVariable long id, @RequestBody ProductItemRequest request) {
+        try {
+            RespMessage respMessage = productItemService.updateProductItem(request, id);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.DELETE, produces = "application/json")
-    public ResponseEntity<String> deleteProductItem() {
-        return ResponseEntity.ok("Hello");
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    public ResponseEntity<String> deleteProductItem(@PathVariable long id) {
+        try {
+            RespMessage respMessage = productItemService.deleteProductItem(id);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @RequestMapping(value = "/{productId}", method = RequestMethod.GET, produces = "application/json")
