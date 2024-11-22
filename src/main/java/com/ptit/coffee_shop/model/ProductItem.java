@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.model;
 
+import com.ptit.coffee_shop.common.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,4 +34,13 @@ public class ProductItem {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "type_id")
     private TypeProduct type;
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) status = Status.ACTIVE;
+    }
 }
