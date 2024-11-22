@@ -44,6 +44,16 @@ public class ProductService {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
         }
     }
+    public RespMessage getProductsByCategoryId(Long categoryId) {
+        try {
+            List<Product> products = productRepository.findByCategoryId(categoryId);
+
+            return messageBuilder.buildSuccessMessage(products);
+        } catch (Exception e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, null , null);
+        }
+    }
+
 
     // Tìm kiếm sản phẩm theo từ khóa và trả về RespMessage
     public RespMessage searchProductsByKeyword(String keyword) {
@@ -123,6 +133,7 @@ public class ProductService {
         List<Category> categories = categoryRepository.findAll();
         return messageBuilder.buildSuccessMessage(categories);
     }
+
 
 
     @Transactional
