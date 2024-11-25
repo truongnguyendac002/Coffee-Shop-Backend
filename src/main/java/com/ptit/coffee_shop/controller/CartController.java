@@ -63,4 +63,19 @@ public class CartController {
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @RequestMapping(value = "/item/{itemId}" , method = RequestMethod.DELETE , produces = "application/json")
+    public ResponseEntity<String> deleteCartItem(@PathVariable Long itemId) {
+        try {
+            RespMessage resp = cartService.deleteCartItem(itemId);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

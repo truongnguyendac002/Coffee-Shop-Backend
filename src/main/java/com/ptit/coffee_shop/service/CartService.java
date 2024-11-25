@@ -129,4 +129,12 @@ public class CartService {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"CartItem"}, "Update Cart Item failed");
         }
     }
+
+    public RespMessage deleteCartItem(Long itemId) {
+        CartItem cartItem = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"CartItem"},
+                        "Cart Item not found with Id: " + itemId));
+        cartItemRepository.delete(cartItem);
+        return messageBuilder.buildSuccessMessage("Delete cart Item successfully");
+    }
 }
