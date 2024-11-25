@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Date;
@@ -30,48 +31,27 @@ public class ForgotPasswordController {
 
     @PostMapping("/verifyEmail/{email}")
     public ResponseEntity<RespMessage> verifyEmail(@PathVariable String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email Invalid"));
 
-        if(optionalUser.isEmpty()){
-//            return  ResponseEntity.badRequest().body("Please provide a valid email!");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RespMessage.builder()
-                    .respCode("103")
-                    .respDesc("email Invalid")
-                    .build() );
-        }
-
-        User user = optionalUser.get();
-
-        Optional<ForgotPassword> existingOtpRecord =forgotPasswordRepository.findByUser(user);
-        if (existingOtpRecord.isPresent()) {
-            ForgotPassword forgotPassword = existingOtpRecord.get();
-            Date currentDate = new Date();
-
-            // Kiểm tra thời hạn của OTP
-            if (forgotPassword.getExpirationTime().after(currentDate)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RespMessage.builder()
-                        .respCode("104")
-                        .respDesc("OTP has already been sent and is still valid.")
-                        .build());
-            } else {
-                // Xóa OTP đã hết hạn
-                forgotPasswordRepository.deleteById(forgotPassword.getId());
-            }
-        }
+        // Kiểm tra xem OTP có tồn tại và còn hiệu lực không
+        forgotPasswordRepository.findByUser(user)
+                .filter(forgotPassword -> forgotPassword.getExpirationTime().after(Date.from(Instant.now())))
+                .ifPresent(forgotPassword -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP đã được gửi và còn hiệu lực.");
+                });
 
         int otp = generateOtpForUser();
+        ForgotPassword forgotPassword = ForgotPassword.builder()
+                .otp(otp)
+                .expirationTime(new Date(System.currentTimeMillis() +600 *1000))
+                .user(user)
+                .build();
 
         MailBody mailBody =MailBody.builder()
                 .to(email)
                 .subject("OTP for Forgot Password request")
                 .body("This is the OTP for your Forgot Password request: " + otp)
-                .build();
-
-
-        ForgotPassword forgotPassword = ForgotPassword.builder()
-                .otp(otp)
-                .expirationTime(new Date(System.currentTimeMillis() +600 *1000))
-                .user(user)
                 .build();
 
         emailService.sendSimpleMail(mailBody);
