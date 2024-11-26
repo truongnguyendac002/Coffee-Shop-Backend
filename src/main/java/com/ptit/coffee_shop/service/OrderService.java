@@ -2,21 +2,16 @@ package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.enums.OrderStatus;
+import com.ptit.coffee_shop.common.enums.PaymentMethod;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
-import com.ptit.coffee_shop.model.Order;
-import com.ptit.coffee_shop.model.OrderItem;
-import com.ptit.coffee_shop.model.ProductItem;
-import com.ptit.coffee_shop.model.ShippingAddress;
+import com.ptit.coffee_shop.model.*;
 import com.ptit.coffee_shop.payload.request.OrderItemRequest;
 import com.ptit.coffee_shop.payload.request.OrderRequest;
 import com.ptit.coffee_shop.payload.response.OrderResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
-import com.ptit.coffee_shop.repository.OrderItemRepository;
-import com.ptit.coffee_shop.repository.OrderRepository;
-import com.ptit.coffee_shop.repository.ProductItemRepository;
-import com.ptit.coffee_shop.repository.ShippingAddressRepository;
+import com.ptit.coffee_shop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +34,8 @@ public class OrderService {
     private ProductItemRepository productItemRepository;
     @Autowired
     private ShippingAddressRepository shippingAddressRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
@@ -137,16 +134,44 @@ public class OrderService {
         throw new RuntimeException("Order not found");
     }
 
+    @Transactional
     public RespMessage cancelOrder(long orderId) {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (orderOptional.isPresent()) {
             Order order = orderOptional.get();
             if (order.getStatus().equals(OrderStatus.Processing)) {
                 order.setStatus(OrderStatus.Cancelled);
+            } else {
+                throw new CoffeeShopException(Constant.UNDEFINED, new Object[]{order}, "Order can not be cancelled");
+            }
+            String paymentMethod = order.getPaymentMethod().toString();
+            if (paymentMethod.equals(PaymentMethod.VNPay.toString())) {
+                Transaction transaction1 = new Transaction();
+                Optional<Transaction> transactionOptional = transactionRepository.findByOrderId(orderId);
+                if (transactionOptional.isPresent()) {
+                    Transaction transaction = transactionOptional.get();
+                    transaction1.setTransactionNo(transaction.getTransactionNo());
+                    transaction1.setAmount(transaction.getAmount());
+                    transaction1.setUser(transaction.getUser());
+                    transaction1.setOrder(transaction.getOrder());
+                    transaction1.setCommand("refund");
+                    transaction1.setTxnRef(transaction.getTxnRef());
+                    transaction1.setPayDate(new Date());
+                } else {
+                    throw new CoffeeShopException(Constant.NOT_FOUND, null, "Transaction not found");
+                }
+                try {
+                    orderRepository.save(order);
+                    transactionRepository.save(transaction1);
+                    return messageBuilder.buildSuccessMessage(order);
+                } catch (CoffeeShopException e){
+                    throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{order}, "Order can not be cancelled");
+                }
+            } else {
                 try {
                     orderRepository.save(order);
                     return messageBuilder.buildSuccessMessage(order);
-                } catch ( Exception e ){
+                } catch (CoffeeShopException e){
                     throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{order}, "Order can not be cancelled");
                 }
             }
