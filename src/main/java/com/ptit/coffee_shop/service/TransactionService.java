@@ -51,4 +51,13 @@ public class TransactionService {
             throw new CoffeeShopException(Constant.NOT_FOUND, null, "Order not found");
         }
     }
+
+    public RespMessage getTransaction(long orderId) {
+        Optional<Transaction> transactionOptional = transactionRepository.findByOrderId(orderId);
+        if (transactionOptional.isPresent()) {
+            Transaction transaction = transactionOptional.get();
+            return messageBuilder.buildSuccessMessage(transaction);
+        }
+        throw new CoffeeShopException(Constant.NOT_FOUND, null, "Transaction not found");
+    }
 }
