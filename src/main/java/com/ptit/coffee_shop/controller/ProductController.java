@@ -105,4 +105,18 @@ public class ProductController {
             return new ResponseEntity<>(respMessage, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @RequestMapping(value = "category/{categoryId}", method = RequestMethod.GET, produces = "application/json")
+    public ResponseEntity<RespMessage> getProductsByCategoryId(@PathVariable Long categoryId) {
+        try {
+            RespMessage respMessage = productService.getProductsByCategoryId(categoryId);
+            return new ResponseEntity<>(respMessage, HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(respMessage, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.UNDEFINED, null, e.getMessage());
+            return new ResponseEntity<>(respMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

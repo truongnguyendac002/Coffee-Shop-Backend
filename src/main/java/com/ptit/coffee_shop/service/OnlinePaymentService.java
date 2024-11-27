@@ -114,16 +114,18 @@ public class OnlinePaymentService {
     public RedirectView handleVNPayReturn(HttpServletRequest request){
         String responseCode = request.getParameter("vnp_ResponseCode");
         RedirectView redirectView = new RedirectView();
+        String status = responseCode.equals("00") ? "success" : "fail";
         if(responseCode.equals("00")) {
-            redirectView.setUrl("http://localhost:3000/payment-success"
-                        + "?txnRef=" + request.getParameter("vnp_TxnRef")
+            redirectView.setUrl("http://localhost:3000/order-status"
+                        + "?status=" + status
+                        + "&txnRef=" + request.getParameter("vnp_TxnRef")
                         + "&transactionNo=" + request.getParameter("vnp_TransactionNo")
                         + "&amount=" + request.getParameter("vnp_Amount")
-                        + "&payDate=" + request.getParameter("vnp_PayDate")
-            );
+                        + "&payDate=" + request.getParameter("vnp_PayDate"));
         } else {
-            redirectView.setUrl("http://localhost:3000/payment-failure"
-                    + "?txnRef=" + request.getParameter("vnp_TxnRef"));
+            redirectView.setUrl("http://localhost:3000/order-status"
+                    + "?status=" + status
+                    + "&txnRef=" + request.getParameter("vnp_TxnRef"));
         }
         return redirectView;
     }
