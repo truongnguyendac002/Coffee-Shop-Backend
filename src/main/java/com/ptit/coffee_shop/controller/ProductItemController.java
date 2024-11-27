@@ -68,7 +68,7 @@ public class ProductItemController {
     }
 
     @RequestMapping(value = "/{productId}", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<RespMessage> getProductItem(@PathVariable long productId) {
+    public ResponseEntity<RespMessage> getProductItems(@PathVariable long productId) {
         RespMessage respMessage = productItemService.getProductItem(productId);
         return new ResponseEntity<>(respMessage, HttpStatus.OK);
     }
