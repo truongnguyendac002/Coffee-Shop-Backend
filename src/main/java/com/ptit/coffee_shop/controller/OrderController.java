@@ -91,4 +91,15 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/user/all")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> getOrdersByUser() {
+        try {
+            RespMessage respMessage = orderService.getOrdersByUser();
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.NOT_FOUND);
+        }
+    }
 }

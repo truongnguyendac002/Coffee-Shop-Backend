@@ -1,6 +1,5 @@
 package com.ptit.coffee_shop.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.common.enums.PaymentMethod;
 import jakarta.persistence.*;
@@ -9,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data

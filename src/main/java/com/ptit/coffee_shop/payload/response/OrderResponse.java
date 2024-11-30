@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.payload.response;
 
 import com.ptit.coffee_shop.model.OrderItem;
+import com.ptit.coffee_shop.model.Review;
 import com.ptit.coffee_shop.model.ShippingAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class OrderResponse {
     private List<OrderItem> orderItems;
     private String paymentMethod;
     private ShippingAddress shippingAddress;
+    private List<Review> listReview;
 }

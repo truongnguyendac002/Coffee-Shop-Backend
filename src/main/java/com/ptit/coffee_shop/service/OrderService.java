@@ -9,10 +9,13 @@ import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.*;
 import com.ptit.coffee_shop.payload.request.OrderItemRequest;
 import com.ptit.coffee_shop.payload.request.OrderRequest;
+import com.ptit.coffee_shop.payload.response.OrderItemResponse;
 import com.ptit.coffee_shop.payload.response.OrderResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,12 @@ public class OrderService {
     private ShippingAddressRepository shippingAddressRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
@@ -177,5 +186,43 @@ public class OrderService {
             }
         }
         throw new RuntimeException("Order not found");
+    }
+
+    public RespMessage getOrdersByUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
+        if (userOptional.isEmpty())
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "User not found by email: " + userEmail + "get from token!");
+        User user = userOptional.get();
+        List<Order> orders = orderRepository.findByUserId(user.getId());
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+//            List<OrderItemResponse> orderItemResponses =
+//                orderItems.stream().map(orderItem -> {
+//                    OrderItemResponse orderItemResponse = new OrderItemResponse();
+//                    orderItemResponse.setId(orderItem.getId());
+//                    orderItemResponse.setAmount(orderItem.getAmount());
+//                    orderItemResponse.setPrice(orderItem.getPrice());
+//                    orderItemResponse.setDiscount(orderItem.getDiscount());
+//                    orderItemResponse.setProductItem(orderItem.getProductItem());
+//                    return orderItemResponse;
+//                }).toList();
+
+            List<Review> reviews = reviewRepository.findByOrderId(order.getId());
+
+            OrderResponse orderResponse = new OrderResponse();
+            orderResponse.setOrderId(order.getId());
+            orderResponse.setOrderDate(order.getOrderDate());
+            orderResponse.setOrderItems(orderItems);
+            orderResponse.setOrderStatus(order.getStatus().toString());
+            orderResponse.setShippingAddress(order.getShippingAddress());
+            orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
+            orderResponse.setListReview(reviews);
+
+            orderResponses.add(orderResponse);
+        }
+
+        return messageBuilder.buildSuccessMessage(orderResponses);
     }
 }
