@@ -14,4 +14,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT rv FROM Review rv WHERE rv.orderItem.order.id = :orderId")
     List<Review> findByOrderId( Long orderId);
+
+
 }

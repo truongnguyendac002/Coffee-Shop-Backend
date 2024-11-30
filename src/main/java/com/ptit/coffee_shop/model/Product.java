@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.model;
 
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.payload.response.ProductResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,5 +54,19 @@ public class Product {
     @PrePersist
     public void prePersist() {
         if (status == null) status = Status.ACTIVE;
+    }
+
+    public ProductResponse toProductResponse() {
+        return ProductResponse.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .image(image)
+                .default_image(default_image)
+                .category(category)
+                .brand(brand)
+                .status(status)
+                .price(price)
+                .build();
     }
 }
