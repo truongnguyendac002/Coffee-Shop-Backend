@@ -13,6 +13,8 @@ public class Constant {
         public static final String SYSTEM_ERROR = "500";
         public static final String NOT_FOUND = "404";
 
+        public static final String FILE_UPLOAD_ERROR = "200";
+
         public static final String UNAUTHORIZED = "401";
 
 }

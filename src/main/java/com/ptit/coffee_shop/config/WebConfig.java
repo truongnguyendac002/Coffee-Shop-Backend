@@ -1,14 +1,17 @@
 package com.ptit.coffee_shop.config;
 
+import com.cloudinary.Cloudinary;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-//cors config
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class WebConfig {
@@ -18,6 +21,17 @@ public class WebConfig {
         messageSource.setBasename("classpath:i18n/messages_vn");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Bean
+    public Cloudinary cloudinaryConfig() {
+        Cloudinary cloudinary = null;
+        Map config = new HashMap();
+        config.put("cloud_name", "dxypitko5");
+        config.put("api_key", "132676838393714");
+        config.put("api_secret", "qXKc59ExtWGyRAbZP5SS3CuM7Jo");
+        cloudinary = new Cloudinary(config);
+        return cloudinary;
     }
 
     @Bean

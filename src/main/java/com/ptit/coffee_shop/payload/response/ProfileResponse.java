@@ -10,15 +10,29 @@ import java.util.Date;
 @Data
 @Builder
 public class ProfileResponse {
+
+    @JsonProperty("id")
+    private Long id;
+
     @JsonProperty("email")
     private String email;
-    @JsonProperty("name")
-    private String name;
+
+    @JsonProperty("role")
+    private String roleName;
+
     @JsonProperty("phone")
     private String phone;
+
+    @JsonProperty("name")
+    private String name;
+
     @JsonProperty("profile_img")
     private String profile_img;
+
     @JsonProperty("created_at")
     private Date created_at;
+    @JsonProperty("status")
+    private String status;
+
 
 }
