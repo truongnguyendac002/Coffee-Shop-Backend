@@ -15,6 +15,8 @@ import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.payload.response.ShippingAddressResponse;
 import com.ptit.coffee_shop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,38 +41,27 @@ public class OrderService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
         List<OrderResponse> orderResponses = new ArrayList<>();
         for (Order order : orders) {
             OrderResponse orderResponse = new OrderResponse();
-            ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
-            ShippingAddress shippingAddress = order.getShippingAddress();
-            shippingAddressResponse.setId(shippingAddress.getId());
-            shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
-            shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
-            shippingAddressResponse.setLocation(shippingAddress.getLocation());
-            shippingAddressResponse.setStatus(shippingAddress.getStatus());
-            shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
             orderResponse.setOrderId(order.getId());
             orderResponse.setOrderDate(order.getOrderDate());
             orderResponse.setOrderStatus(order.getStatus().toString());
             orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
-            orderResponse.setShippingAddress(shippingAddressResponse);
+            orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
-            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
             double totalPrice = 0;
             for (OrderItem orderItem : orderItems) {
-                OrderItemResponse orderItemResponse = new OrderItemResponse();
-                orderItemResponse.setOrderItemId(orderItem.getId());
-                orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
-                orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
-                orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
-                orderItemResponse.setAmount(orderItem.getAmount());
-                orderItemResponse.setPrice(orderItem.getPrice());
-                orderItemResponse.setDiscount(orderItem.getDiscount());
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
-                orderItemResponses.add(orderItemResponse);
             }
             orderResponse.setOrderItems(orderItemResponses);
             orderResponse.setTotal(totalPrice);
@@ -87,32 +78,15 @@ public class OrderService {
             OrderResponse orderResponse = new OrderResponse();
             orderResponse.setOrderId(order.getId());
             orderResponse.setOrderDate(order.getOrderDate());
-            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
             double totalPrice = 0;
             for (OrderItem orderItem : orderItems) {
-                OrderItemResponse orderItemResponse = new OrderItemResponse();
-                orderItemResponse.setOrderItemId(orderItem.getId());
-                orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
-                orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
-                orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
-                orderItemResponse.setAmount(orderItem.getAmount());
-                orderItemResponse.setPrice(orderItem.getPrice());
-                orderItemResponse.setDiscount(orderItem.getDiscount());
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
-                orderItemResponses.add(orderItemResponse);
             }
             orderResponse.setOrderItems(orderItemResponses);
             orderResponse.setTotal(totalPrice);
             orderResponse.setOrderStatus(order.getStatus().toString());
-            ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
-            ShippingAddress shippingAddress = order.getShippingAddress();
-            shippingAddressResponse.setId(shippingAddress.getId());
-            shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
-            shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
-            shippingAddressResponse.setLocation(shippingAddress.getLocation());
-            shippingAddressResponse.setStatus(shippingAddress.getStatus());
-            shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
-            orderResponse.setShippingAddress(shippingAddressResponse);
+            orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
             orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
             return messageBuilder.buildSuccessMessage(orderResponse);
         }
@@ -148,6 +122,7 @@ public class OrderService {
 
             int stock = productItemOptional.get().getStock();
             int orderedAmount = orderItemRequest.getAmount();
+
             if (orderedAmount > stock) {
                 throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[] {"order_amount"}, "Amount Item cannot be greater than stock");
             }
@@ -245,39 +220,61 @@ public class OrderService {
         throw new RuntimeException("Order not found");
     }
 
+    public RespMessage getOrdersByUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
+        if (userOptional.isEmpty())
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "User not found by email: " + userEmail + "get from token!");
+        User user = userOptional.get();
+        List<Order> orders = orderRepository.findByUserId(user.getId());
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+//            List<OrderItemResponse> orderItemResponses =
+//                orderItems.stream().map(orderItem -> {
+//                    OrderItemResponse orderItemResponse = new OrderItemResponse();
+//                    orderItemResponse.setId(orderItem.getId());
+//                    orderItemResponse.setAmount(orderItem.getAmount());
+//                    orderItemResponse.setPrice(orderItem.getPrice());
+//                    orderItemResponse.setDiscount(orderItem.getDiscount());
+//                    orderItemResponse.setProductItem(orderItem.getProductItem());
+//                    return orderItemResponse;
+//                }).toList();
+
+//            List<Review> reviews = reviewRepository.findByOrderId(order.getId());
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
+
+            OrderResponse orderResponse = new OrderResponse();
+            orderResponse.setOrderId(order.getId());
+            orderResponse.setOrderDate(order.getOrderDate());
+            orderResponse.setOrderItems(orderItemResponses);
+            orderResponse.setOrderStatus(order.getStatus().toString());
+            orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
+            orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
+//            orderResponse.setListReview(reviews);
+
+            orderResponses.add(orderResponse);
+        }
+
+        return messageBuilder.buildSuccessMessage(orderResponses);
+    }
+
     public RespMessage getOrderByStatus(OrderStatus status) {
         try {
             List<Order> orders = orderRepository.findByStatus(status);
             List<OrderResponse> orderResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderResponse orderResponse = new OrderResponse();
-                ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
-                ShippingAddress shippingAddress = order.getShippingAddress();
-                shippingAddressResponse.setId(shippingAddress.getId());
-                shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
-                shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
-                shippingAddressResponse.setLocation(shippingAddress.getLocation());
-                shippingAddressResponse.setStatus(shippingAddress.getStatus());
-                shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
                 orderResponse.setOrderId(order.getId());
                 orderResponse.setOrderDate(order.getOrderDate());
                 orderResponse.setOrderStatus(order.getStatus().toString());
                 orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
-                orderResponse.setShippingAddress(shippingAddressResponse);
+                orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
                 List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
-                List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+                List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
                 double totalPrice = 0;
                 for (OrderItem orderItem : orderItems) {
-                    OrderItemResponse orderItemResponse = new OrderItemResponse();
-                    orderItemResponse.setOrderItemId(orderItem.getId());
-                    orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
-                    orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
-                    orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
-                    orderItemResponse.setAmount(orderItem.getAmount());
-                    orderItemResponse.setPrice(orderItem.getPrice());
-                    orderItemResponse.setDiscount(orderItem.getDiscount());
                     totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
-                    orderItemResponses.add(orderItemResponse);
                 }
                 orderResponse.setOrderItems(orderItemResponses);
                 orderResponse.setTotal(totalPrice);

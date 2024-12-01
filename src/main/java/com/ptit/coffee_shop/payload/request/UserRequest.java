@@ -19,4 +19,10 @@ public class UserRequest {
 
     @JsonProperty("ProfileImg")
     private String profileImg;
+
+    @JsonProperty("Password")
+    private String password;
+
+    @JsonProperty("ConfirmPassword")
+    private String confirmPassword;
 }

@@ -4,20 +4,16 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
-import com.ptit.coffee_shop.model.Brand;
-import com.ptit.coffee_shop.model.Category;
-import com.ptit.coffee_shop.model.Product;
-import com.ptit.coffee_shop.model.TypeProduct;
+import com.ptit.coffee_shop.model.*;
 import com.ptit.coffee_shop.payload.request.ProductRequest;
 import com.ptit.coffee_shop.payload.response.RespMessage;
-import com.ptit.coffee_shop.repository.BrandRepository;
-import com.ptit.coffee_shop.repository.CategoryRepository;
-import com.ptit.coffee_shop.repository.ProductRepository;
-import com.ptit.coffee_shop.repository.TypeProductRepository;
+import com.ptit.coffee_shop.payload.response.ReviewResponse;
+import com.ptit.coffee_shop.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +24,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final TypeProductRepository typeProductRepository;
+    private final ReviewRepository reviewRepository;
     private final MessageBuilder messageBuilder;
 
     public RespMessage getAllProduct() {
@@ -36,6 +33,19 @@ public class ProductService {
         return messageBuilder.buildSuccessMessage(activeProducts);
     }
 
+    //    public RespMessage getAllProduct() {
+//        List<Product> products = productRepository.findAll();
+//        List<ProductResponse> activeProducts = products.stream().filter(product -> product.getStatus() == Status.ACTIVE).map(Product::toProductResponse).toList();
+//
+//        for (ProductResponse product : activeProducts) {
+//            List<Review> reviews = reviewRepository.findByProductId(product.getId());
+//            for (Review review : reviews) {
+//                product.setTotalReview(product.getTotalReview() + 1);
+//                product.setRating(product.getRating() + review.getRating());
+//            }
+//        }
+//        return messageBuilder.buildSuccessMessage(activeProducts);
+//    }
     public RespMessage getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {

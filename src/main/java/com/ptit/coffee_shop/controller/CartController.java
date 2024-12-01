@@ -63,7 +63,6 @@ public class CartController {
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     @RequestMapping(value = "/item/{itemId}" , method = RequestMethod.DELETE , produces = "application/json")
     public ResponseEntity<String> deleteCartItem(@PathVariable Long itemId) {
         try {
