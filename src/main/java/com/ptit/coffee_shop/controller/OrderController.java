@@ -3,6 +3,7 @@ package com.ptit.coffee_shop.controller;
 
 import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
+import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.Order;
@@ -91,4 +92,17 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/status/{orderStatus}")
+    public ResponseEntity<String> getOrderByStatus(@PathVariable OrderStatus orderStatus) {
+        try {
+            RespMessage respMessage = orderService.getOrderByStatus(orderStatus);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.SYSTEM_ERROR, null, e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -17,7 +17,8 @@ public class OrderResponse {
     private long orderId;
     private String orderStatus;
     private Date orderDate;
-    private List<OrderItem> orderItems;
+    private List<OrderItemResponse> orderItems;
+    private double total;
     private String paymentMethod;
-    private ShippingAddress shippingAddress;
+    private ShippingAddressResponse shippingAddress;
 }

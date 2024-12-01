@@ -9,8 +9,10 @@ import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.*;
 import com.ptit.coffee_shop.payload.request.OrderItemRequest;
 import com.ptit.coffee_shop.payload.request.OrderRequest;
+import com.ptit.coffee_shop.payload.response.OrderItemResponse;
 import com.ptit.coffee_shop.payload.response.OrderResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
+import com.ptit.coffee_shop.payload.response.ShippingAddressResponse;
 import com.ptit.coffee_shop.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,42 @@ public class OrderService {
 
     public RespMessage getAllOrders() {
         List<Order> orders = orderRepository.findAll();
-        return messageBuilder.buildSuccessMessage(orders);
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            OrderResponse orderResponse = new OrderResponse();
+            ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
+            ShippingAddress shippingAddress = order.getShippingAddress();
+            shippingAddressResponse.setId(shippingAddress.getId());
+            shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
+            shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
+            shippingAddressResponse.setLocation(shippingAddress.getLocation());
+            shippingAddressResponse.setStatus(shippingAddress.getStatus());
+            shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
+            orderResponse.setOrderId(order.getId());
+            orderResponse.setOrderDate(order.getOrderDate());
+            orderResponse.setOrderStatus(order.getStatus().toString());
+            orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
+            orderResponse.setShippingAddress(shippingAddressResponse);
+            List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            double totalPrice = 0;
+            for (OrderItem orderItem : orderItems) {
+                OrderItemResponse orderItemResponse = new OrderItemResponse();
+                orderItemResponse.setOrderItemId(orderItem.getId());
+                orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
+                orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
+                orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
+                orderItemResponse.setAmount(orderItem.getAmount());
+                orderItemResponse.setPrice(orderItem.getPrice());
+                orderItemResponse.setDiscount(orderItem.getDiscount());
+                totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
+                orderItemResponses.add(orderItemResponse);
+            }
+            orderResponse.setOrderItems(orderItemResponses);
+            orderResponse.setTotal(totalPrice);
+            orderResponses.add(orderResponse);
+        }
+        return messageBuilder.buildSuccessMessage(orderResponses);
     }
 
     public RespMessage getOrderById(long orderId) {
@@ -50,9 +87,32 @@ public class OrderService {
             OrderResponse orderResponse = new OrderResponse();
             orderResponse.setOrderId(order.getId());
             orderResponse.setOrderDate(order.getOrderDate());
-            orderResponse.setOrderItems(orderItems);
+            List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+            double totalPrice = 0;
+            for (OrderItem orderItem : orderItems) {
+                OrderItemResponse orderItemResponse = new OrderItemResponse();
+                orderItemResponse.setOrderItemId(orderItem.getId());
+                orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
+                orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
+                orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
+                orderItemResponse.setAmount(orderItem.getAmount());
+                orderItemResponse.setPrice(orderItem.getPrice());
+                orderItemResponse.setDiscount(orderItem.getDiscount());
+                totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
+                orderItemResponses.add(orderItemResponse);
+            }
+            orderResponse.setOrderItems(orderItemResponses);
+            orderResponse.setTotal(totalPrice);
             orderResponse.setOrderStatus(order.getStatus().toString());
-            orderResponse.setShippingAddress(order.getShippingAddress());
+            ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
+            ShippingAddress shippingAddress = order.getShippingAddress();
+            shippingAddressResponse.setId(shippingAddress.getId());
+            shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
+            shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
+            shippingAddressResponse.setLocation(shippingAddress.getLocation());
+            shippingAddressResponse.setStatus(shippingAddress.getStatus());
+            shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
+            orderResponse.setShippingAddress(shippingAddressResponse);
             orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
             return messageBuilder.buildSuccessMessage(orderResponse);
         }
@@ -88,9 +148,15 @@ public class OrderService {
 
             int stock = productItemOptional.get().getStock();
             int orderedAmount = orderItemRequest.getAmount();
-
             if (orderedAmount > stock) {
                 throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[] {"order_amount"}, "Amount Item cannot be greater than stock");
+            }
+            try {
+                ProductItem productItem = productItemOptional.get();
+                productItem.setStock(productItem.getStock() - orderedAmount);
+                productItemRepository.save(productItem);
+            } catch (Exception e) {
+                throw new CoffeeShopException(Constant.UNDEFINED, new Object[] {"product_item"}, "Product item cannot be update at stock");
             }
             OrderItem orderItem = new OrderItem();
             orderItem.setProductItem(productItemOptional.get());
@@ -105,7 +171,7 @@ public class OrderService {
                 orderItem.setOrder(order1);
                 orderItemRepository.save(orderItem);
             }
-            return messageBuilder.buildSuccessMessage(order1);
+            return messageBuilder.buildSuccessMessage(order1.getId());
         } catch (Exception e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"order"}, "Order can not be added");
         }
@@ -117,16 +183,16 @@ public class OrderService {
             Order order = orderOptional.get();
             if (order.getStatus().equals(OrderStatus.Processing)){
                 order.setStatus(OrderStatus.Awaiting);
-            }
-            if (order.getStatus().equals(OrderStatus.Awaiting)) {
+            } else if (order.getStatus().equals(OrderStatus.Awaiting)) {
                 order.setStatus(OrderStatus.Shipping);
-            }
-            if (order.getStatus().equals(OrderStatus.Shipping)) {
+            } else if (order.getStatus().equals(OrderStatus.Shipping)) {
                 order.setStatus(OrderStatus.Completed);
+            } else {
+                throw new RuntimeException("Order can not be updated");
             }
             try {
                 orderRepository.save(order);
-                return messageBuilder.buildSuccessMessage(order);
+                return messageBuilder.buildSuccessMessage(order.getStatus());
             } catch (CoffeeShopException e){
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{order}, "Order can not be updated");
             }
@@ -163,19 +229,63 @@ public class OrderService {
                 try {
                     orderRepository.save(order);
                     transactionRepository.save(transaction1);
-                    return messageBuilder.buildSuccessMessage(order);
+                    return messageBuilder.buildSuccessMessage(order.getStatus());
                 } catch (CoffeeShopException e){
                     throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{order}, "Order can not be cancelled");
                 }
             } else {
                 try {
                     orderRepository.save(order);
-                    return messageBuilder.buildSuccessMessage(order);
+                    return messageBuilder.buildSuccessMessage(order.getStatus());
                 } catch (CoffeeShopException e){
                     throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{order}, "Order can not be cancelled");
                 }
             }
         }
         throw new RuntimeException("Order not found");
+    }
+
+    public RespMessage getOrderByStatus(OrderStatus status) {
+        try {
+            List<Order> orders = orderRepository.findByStatus(status);
+            List<OrderResponse> orderResponses = new ArrayList<>();
+            for (Order order : orders) {
+                OrderResponse orderResponse = new OrderResponse();
+                ShippingAddressResponse shippingAddressResponse = new ShippingAddressResponse();
+                ShippingAddress shippingAddress = order.getShippingAddress();
+                shippingAddressResponse.setId(shippingAddress.getId());
+                shippingAddressResponse.setReceiverName(shippingAddress.getReceiverName());
+                shippingAddressResponse.setReceiverPhone(shippingAddress.getReceiverPhone());
+                shippingAddressResponse.setLocation(shippingAddress.getLocation());
+                shippingAddressResponse.setStatus(shippingAddress.getStatus());
+                shippingAddressResponse.setUserId(shippingAddress.getUser().getId());
+                orderResponse.setOrderId(order.getId());
+                orderResponse.setOrderDate(order.getOrderDate());
+                orderResponse.setOrderStatus(order.getStatus().toString());
+                orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
+                orderResponse.setShippingAddress(shippingAddressResponse);
+                List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+                List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+                double totalPrice = 0;
+                for (OrderItem orderItem : orderItems) {
+                    OrderItemResponse orderItemResponse = new OrderItemResponse();
+                    orderItemResponse.setOrderItemId(orderItem.getId());
+                    orderItemResponse.setProductItemId(orderItem.getProductItem().getId());
+                    orderItemResponse.setProductName(orderItem.getProductItem().getProduct().getName());
+                    orderItemResponse.setProductType(orderItem.getProductItem().getType().getName());
+                    orderItemResponse.setAmount(orderItem.getAmount());
+                    orderItemResponse.setPrice(orderItem.getPrice());
+                    orderItemResponse.setDiscount(orderItem.getDiscount());
+                    totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
+                    orderItemResponses.add(orderItemResponse);
+                }
+                orderResponse.setOrderItems(orderItemResponses);
+                orderResponse.setTotal(totalPrice);
+                orderResponses.add(orderResponse);
+            }
+            return messageBuilder.buildSuccessMessage(orderResponses);
+        } catch (CoffeeShopException e) {
+            throw new CoffeeShopException(Constant.UNDEFINED, null, "Order not found");
+        }
     }
 }
