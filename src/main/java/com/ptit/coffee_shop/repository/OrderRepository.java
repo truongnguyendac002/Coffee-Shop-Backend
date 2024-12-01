@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.repository;
 
+import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT od FROM Order od WHERE od.shippingAddress.user.id = :userId")
     List<Order> findByUserId(@Param("userId") Long userId);
 
+
+    @Query("SELECT od FROM Order od WHERE od.status = :orderStatus")
+    List<Order> findByStatus(@Param("orderStatus") OrderStatus orderStatus );
 }

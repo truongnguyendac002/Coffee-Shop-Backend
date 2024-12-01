@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.model;
 
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.payload.response.ReviewResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,5 +41,10 @@ public class Review {
     public void prePersist() {
         createAt = new Date();
         if( status == null ) status = Status.ACTIVE;
+    }
+
+    public ReviewResponse toResponse() {
+        return new ReviewResponse(id, orderItem.getOrder().getShippingAddress().getUser().getEmail(), orderItem.getOrder().getShippingAddress().getUser().getName(),
+                                    orderItem.getOrder().getShippingAddress().getUser().getProfile_img(), rating, comment, createAt);
     }
 }
