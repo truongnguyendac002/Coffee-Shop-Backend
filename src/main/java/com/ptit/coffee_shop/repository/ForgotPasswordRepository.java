@@ -16,4 +16,8 @@ public interface ForgotPasswordRepository extends JpaRepository<ForgotPassword, 
     @Transactional
     @Modifying
     void deleteByExpirationTimeBefore(Date expirationTime);
+
+    @Transactional
+    @Modifying
+    void deleteByUser(User user);
 }
