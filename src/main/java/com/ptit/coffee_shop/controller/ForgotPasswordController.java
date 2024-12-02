@@ -105,6 +105,11 @@ public class ForgotPasswordController {
         userRepository.updatePassword(email, encodedPassword);
 
 //        return ResponseEntity.ok("Password has been changed!");
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            forgotPasswordRepository.deleteByUser(user);
+        }
         return ResponseEntity.ok(RespMessage.builder()
                 .respCode("000")
                 .respDesc("Password has been changed!")

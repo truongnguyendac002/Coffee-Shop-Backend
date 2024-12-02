@@ -37,9 +37,11 @@ public class ReviewService {
             review.setRating(reviewRequet.getRating());
             review.setComment(reviewRequet.getComment());
             review.setOrderItem(orderItem);
+            orderItem.setReviewed(true);
             try {
+                orderItemRepository.save(orderItem);
                 reviewRepository.save(review);
-                return messageBuilder.buildSuccessMessage(review);
+                return messageBuilder.buildSuccessMessage(review.toResponse());
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.UNDEFINED, null, "Review could not be saved");
             }
@@ -50,7 +52,8 @@ public class ReviewService {
 
     public RespMessage getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
-        return messageBuilder.buildSuccessMessage(reviews);
+        List<ReviewResponse> reviewResponses = reviews.stream().map(Review::toResponse).toList();
+        return messageBuilder.buildSuccessMessage(reviewResponses);
     }
 
     public RespMessage deleteReview(long reviewId) {
@@ -60,7 +63,7 @@ public class ReviewService {
             review.setStatus(Status.INACTIVE);
             try {
                 reviewRepository.save(review);
-                return messageBuilder.buildSuccessMessage(review);
+                return messageBuilder.buildSuccessMessage(review.toResponse());
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.UNDEFINED, null, "Review could not be saved");
             }
@@ -72,18 +75,7 @@ public class ReviewService {
     public RespMessage getReviewByProductId(long productId) {
         try {
             List<Review> reviews = reviewRepository.findByProductId(productId);
-            List<ReviewResponse> reviewResponses = new ArrayList<>();
-            for (Review review : reviews) {
-                ReviewResponse reviewResponse = new ReviewResponse();
-                reviewResponse.setId(review.getId());
-                reviewResponse.setUserEmail(review.getOrderItem().getOrder().getShippingAddress().getUser().getEmail());
-                reviewResponse.setName(review.getOrderItem().getOrder().getShippingAddress().getUser().getName());
-                reviewResponse.setUserAvatar(review.getOrderItem().getOrder().getShippingAddress().getUser().getProfile_img());
-                reviewResponse.setRating(review.getRating());
-                reviewResponse.setComment(review.getComment());
-                reviewResponse.setCreateAt(review.getCreateAt());
-                reviewResponses.add(reviewResponse);
-            }
+            List<ReviewResponse> reviewResponses = reviews.stream().map(Review::toResponse).toList();
             return messageBuilder.buildSuccessMessage(reviewResponses);
         } catch (CoffeeShopException e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Review not found");

@@ -8,21 +8,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
+
 public class OrderItemResponse {
-    private long id;
-
+    private long orderItemId;
+    private long productItemId;
+    private String productName;
+    private String productType;
     private int amount;
-
     private double price;
-
     private double discount;
 
-    private ProductItem productItem;
+//    private ProductItem productItem;
 
-    private Order order;
+//    private Order order;
 
     private boolean isReviewed;
 }

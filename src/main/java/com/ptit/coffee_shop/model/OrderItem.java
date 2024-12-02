@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ptit.coffee_shop.common.enums.OrderStatus;
 import com.ptit.coffee_shop.common.enums.Status;
+import com.ptit.coffee_shop.payload.response.OrderItemResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,4 +38,15 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Column(name = "is_reviewed")
+    private boolean isReviewed;
+
+    public OrderItemResponse toResponse() {
+        return new OrderItemResponse(id, productItem.getId(), productItem.getProduct().getName(), productItem.getType().getName(), amount, price, discount, isReviewed);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        isReviewed = false;
+    }
 }
