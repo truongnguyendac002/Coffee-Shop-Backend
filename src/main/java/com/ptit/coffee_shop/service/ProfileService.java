@@ -68,7 +68,7 @@ public class ProfileService {
             throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "User not found by email: " + userEmail + "get from token!");
         User user = userOptional.get();
         Map<String, Object> data = cloudinaryService.upload(file, "Avatar");
-        System.out.println("data: " + data);
+        System.out.println(data);
         String url = (String) data.get("url");
         System.out.println();
         user.setProfile_img(url);

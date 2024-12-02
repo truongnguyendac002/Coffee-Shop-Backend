@@ -6,16 +6,16 @@ import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.*;
 import com.ptit.coffee_shop.payload.request.ProductRequest;
+import com.ptit.coffee_shop.payload.response.ProductResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.payload.response.ReviewResponse;
 import com.ptit.coffee_shop.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,30 +26,29 @@ public class ProductService {
     private final TypeProductRepository typeProductRepository;
     private final ReviewRepository reviewRepository;
     private final MessageBuilder messageBuilder;
-
+    private final CloudinaryService cloudinaryService;
+    private final ImageRepository imageRepository;
     public RespMessage getAllProduct() {
         List<Product> products = productRepository.findAll();
         List<Product> activeProducts = products.stream().filter(product -> product.getStatus() == Status.ACTIVE).toList();
-        return messageBuilder.buildSuccessMessage(activeProducts);
+        List<ProductResponse> productResponseList = new ArrayList<>();
+        for (Product product : activeProducts) {
+            List<Image> images = imageRepository.findByProduct(product);
+            ProductResponse productResponse = product.toProductResponse();
+            productResponse.setImages(images);
+            productResponseList.add(productResponse);
+        }
+        return messageBuilder.buildSuccessMessage(productResponseList);
     }
 
-    //    public RespMessage getAllProduct() {
-//        List<Product> products = productRepository.findAll();
-//        List<ProductResponse> activeProducts = products.stream().filter(product -> product.getStatus() == Status.ACTIVE).map(Product::toProductResponse).toList();
-//
-//        for (ProductResponse product : activeProducts) {
-//            List<Review> reviews = reviewRepository.findByProductId(product.getId());
-//            for (Review review : reviews) {
-//                product.setTotalReview(product.getTotalReview() + 1);
-//                product.setRating(product.getRating() + review.getRating());
-//            }
-//        }
-//        return messageBuilder.buildSuccessMessage(activeProducts);
-//    }
     public RespMessage getProductById(Long id) {
-        Optional<Product> product = productRepository.findById(id);
-        if (product.isPresent()) {
-            return messageBuilder.buildSuccessMessage(product.get());
+        Optional<Product> productOp = productRepository.findById(id);
+        if (productOp.isPresent()) {
+            Product product = productOp.get();
+            ProductResponse productResponse = product.toProductResponse();
+            List<Image> images = imageRepository.findByProduct(product);
+            productResponse.setImages(images);
+            return messageBuilder.buildSuccessMessage(productResponse);
         } else {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
         }
@@ -226,5 +225,45 @@ public class ProductService {
     public RespMessage getAllTypeProduct() {
         List<TypeProduct> typeProducts = typeProductRepository.findAll();
         return messageBuilder.buildSuccessMessage(typeProducts);
+    }
+
+    public RespMessage uploadImage(Long id, MultipartFile file) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"product"}, "Product not found");
+        }
+        Product product = productOptional.get();
+        try {
+            Map<String, Object> data = cloudinaryService.upload(file, "Product");
+            String url = (String) data.get("url");
+            Image image = new Image();
+            image.setUrl(url);
+            image.setProduct(product);
+            imageRepository.save(image);
+            return messageBuilder.buildSuccessMessage(getProductResponse(product));
+        } catch (Exception e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e.getMessage()}, "Error when upload image");
+        }
+
+    }
+
+    public ProductResponse getProductResponse(Product product) {
+        List<Image> images = imageRepository.findByProduct(product);
+        ProductResponse productResponse = product.toProductResponse();
+        productResponse.setImages(images);
+        return productResponse;
+    }
+
+    public RespMessage deleteImage(Long id) {
+        Optional<Image> imageOptional = imageRepository.findById(id);
+        if (imageOptional.isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"image"}, "Image not found");
+        }
+        Image image = imageOptional.get();
+        imageRepository.delete(image);
+        cloudinaryService.delete(image.getUrl());
+        ProductResponse productResponse = getProductResponse(image.getProduct());
+
+        return messageBuilder.buildSuccessMessage(productResponse);
     }
 }
