@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.payload.response.ProfileResponse;
+import com.ptit.coffee_shop.payload.response.UserStatisticResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -94,5 +95,9 @@ public class User implements UserDetails {
                 .profile_img(profile_img)
                 .created_at(created_at)
                 .build();
+    }
+
+    public UserStatisticResponse toStatistic() {
+        return new UserStatisticResponse(id, name, email, created_at, 0);
     }
 }
