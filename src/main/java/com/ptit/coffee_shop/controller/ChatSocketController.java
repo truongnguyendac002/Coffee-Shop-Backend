@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Controller;
 public class ChatSocketController {
     public final ChatService chatService;
     public final MessageBuilder messageBuilder;
-    public final SimpMessagingTemplate simpMessagingTemplate;
+    public final SimpMessageSendingOperations simpMessageSendingOperations;
     @MessageMapping("/chat/{conversationId}")
     @SendTo("/topic/conversation/{conversationId}")
     public String sendMessage(
@@ -32,6 +33,7 @@ public class ChatSocketController {
         try {
             RespMessage conversationResponse = chatService.updateConversation(message, conversationId);
             String response = GsonUtil.getInstance().toJson(conversationResponse);
+            simpMessageSendingOperations.convertAndSend("/topic/admin" , response);
             return response;
         } catch (CoffeeShopException exception) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(exception.getCode(), exception.getObjects(), exception.getMessage());
@@ -42,24 +44,5 @@ public class ChatSocketController {
             return GsonUtil.getInstance().toJson(respMessage);
         }
     }
-
-    @MessageMapping("/chat/admin")
-    @SendTo("/topic/admin")
-    public String sendToAdmin(
-            String message) {
-        try {
-            log.info("Message from client: " + message);
-            return message;
-        } catch (CoffeeShopException exception) {
-            RespMessage respMessage = messageBuilder.buildFailureMessage(exception.getCode(), exception.getObjects(), exception.getMessage());
-            return GsonUtil.getInstance().toJson(respMessage);
-
-        } catch (Exception e) {
-            RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.SYSTEM_ERROR, null, e.getMessage());
-            return GsonUtil.getInstance().toJson(respMessage);
-        }
-    }
-
-
 
 }
