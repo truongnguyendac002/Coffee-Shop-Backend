@@ -2,6 +2,7 @@ package com.ptit.coffee_shop.model;
 
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.payload.response.ProductResponse;
+import com.ptit.coffee_shop.payload.response.ProductStatisticResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,5 +68,9 @@ public class Product {
                 .status(status)
                 .price(price)
                 .build();
+    }
+
+    public ProductStatisticResponse toStatisticResponse() {
+        return new ProductStatisticResponse(id, name, category.getName(), brand.getName(), 0, 0);
     }
 }
