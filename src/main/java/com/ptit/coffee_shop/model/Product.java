@@ -33,15 +33,15 @@ public class Product {
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
     private List<Image> image;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     @JoinColumn(name = "default_image_id")
     private Image default_image;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "brand_id")
     private Brand brand;
 

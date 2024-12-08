@@ -27,7 +27,7 @@ public class Category {
     private String description;
 
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne()
     @JoinColumn(name = "default_image_id")
     private Image defaultImage;
 
