@@ -30,7 +30,6 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "default_image_id")
     private Image default_image;

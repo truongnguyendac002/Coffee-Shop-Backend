@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 public class OrderItemResponse {
     private long orderItemId;
     private long productItemId;
+    private long productId;
     private String productName;
     private String productType;
     private int amount;
     private double price;
     private double discount;
-
 //    private ProductItem productItem;
 
 //    private Order order;

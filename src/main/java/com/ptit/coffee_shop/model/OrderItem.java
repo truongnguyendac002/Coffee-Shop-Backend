@@ -42,7 +42,17 @@ public class OrderItem {
     private boolean isReviewed;
 
     public OrderItemResponse toResponse() {
-        return new OrderItemResponse(id, productItem.getId(), productItem.getProduct().getName(), productItem.getType().getName(), amount, price, discount, isReviewed);
+        return OrderItemResponse.builder()
+                .orderItemId(id)
+                .productItemId(productItem.getId())
+                .productId(productItem.getProduct().getId())
+                .productName(productItem.getProduct().getName())
+                .productType(productItem.getType().getName())
+                .amount(amount)
+                .price(price)
+                .discount(discount)
+                .isReviewed(isReviewed)
+                .build();
     }
 
     @PrePersist
