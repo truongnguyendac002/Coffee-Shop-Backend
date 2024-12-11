@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    @Query("SELECT rv FROM Review rv WHERE rv.orderItem.productItem.product.id = :productId")
+    @Query("SELECT rv FROM Review rv WHERE rv.orderItem.productItem.product.id = :productId AND rv.status = 'ACTIVE'")
     List<Review> findByProductId(@Param("productId") Long productId);
 
     @Query("SELECT rv FROM Review rv WHERE rv.orderItem.order.id = :orderId")

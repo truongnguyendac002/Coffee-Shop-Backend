@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
     private final ReviewService reviewService;
     private final MessageBuilder messageBuilder;
-    private final ReviewRepository reviewRepository;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<String> addReview(@RequestBody ReviewRequet reviewRequet) {
@@ -34,11 +33,6 @@ public class ReviewController {
         }
     }
 
-    @RequestMapping(value = "/get-all", method = RequestMethod.GET, produces = "application/json")
-    public ResponseEntity<String> getAllReviews() {
-        RespMessage respMessage = reviewService.getAllReviews();
-        return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
-    }
 
     @RequestMapping(value = "/{reviewId}", method = RequestMethod.DELETE, produces = "application/json")
     public ResponseEntity<String> deleteReview(@PathVariable("reviewId") long reviewId) {
@@ -51,7 +45,7 @@ public class ReviewController {
         }
     }
 
-    @RequestMapping(value = "/{productId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/product/{productId}", method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<String> getReviewsByProductId(@PathVariable("productId") long productId) {
         try {
             RespMessage respMessage = reviewService.getReviewByProductId(productId);
