@@ -14,7 +14,7 @@ public class FavoriteProductResponse {
     private long id;
 
     @JsonProperty("product")
-    private Product product;
+    private ProductResponse productResponse;
 
     @JsonProperty("user_id")
     private Long userId;

@@ -8,6 +8,7 @@ import com.ptit.coffee_shop.model.Product;
 import com.ptit.coffee_shop.model.User;
 import com.ptit.coffee_shop.payload.request.FavoriteProductRequest;
 import com.ptit.coffee_shop.payload.response.FavoriteProductResponse;
+import com.ptit.coffee_shop.payload.response.ProductResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.FavoriteProductRepository;
 import com.ptit.coffee_shop.repository.ProductRepository;
@@ -29,8 +30,9 @@ public class FavoriteProductService {
     private final FavoriteProductRepository favoriteProductRepository;
     private final MessageBuilder messageBuilder;
     public final UserRepository userRepository;
+    private final ProductService productService;
 
-    // Get list of favorite products for a specific user
+
     public RespMessage getFavoriteProducts(Long userId) {
         if (userId <= 0) {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"UserId"}, "UserId invalid");
@@ -38,16 +40,21 @@ public class FavoriteProductService {
 
         List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findByUserId(userId);
         List<FavoriteProductResponse> favoriteProductResponses = favoriteProducts.stream()
-                .map(favoriteProduct -> new FavoriteProductResponse(
-                        favoriteProduct.getId(),
-                        favoriteProduct.getProduct(),
-                        favoriteProduct.getUser().getId()
-                )).collect(Collectors.toList());
+                .map(favoriteProduct -> {
+                    ProductResponse productResponse =productService.getProductResponse(favoriteProduct.getProduct());
+
+
+                    return new FavoriteProductResponse(
+                            favoriteProduct.getId(),
+                            productResponse,
+                            favoriteProduct.getUser().getId()
+                    );
+                }).collect(Collectors.toList());
 
         return messageBuilder.buildSuccessMessage(favoriteProductResponses);
     }
 
-    // Add a product to the user's favorite list
+
     public RespMessage addFavoriteProduct(FavoriteProductRequest request) {
         if (request.getUserId() <= 0) {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"UserId"}, "UserId invalid");
@@ -56,37 +63,41 @@ public class FavoriteProductService {
             throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"ProductId"}, "ProductId invalid");
         }
 
-        Optional<Product> product = productRepository.findById(request.getProductId());
-        if (product.isEmpty()) {
+        Optional<Product> productOpt = productRepository.findById(request.getProductId());
+        if (productOpt.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"Product"}, "Product not found");
         }
+        Product product = productOpt.get();
 
-        Optional<User> user = userRepository.findById(request.getUserId());
-        if (user.isEmpty()) {
+        Optional<User> userOpt = userRepository.findById(request.getUserId());
+        if (userOpt.isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"UserId"}, "UserId not found");
         }
+        User user = userOpt.get();
 
         if (favoriteProductRepository.existsByUserIdAndProductId(request.getUserId(), request.getProductId())) {
             throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"FavoriteProduct"}, "This product is already in favorites");
         }
 
         FavoriteProduct favoriteProduct = FavoriteProduct.builder()
-                .product(product.get())
-                .user(user.get())
+                .product(product)
+                .user(user)
                 .build();
         favoriteProduct = favoriteProductRepository.save(favoriteProduct);
 
+        ProductResponse productResponse = productService.getProductResponse(product);
+
         FavoriteProductResponse response = new FavoriteProductResponse(
                 favoriteProduct.getId(),
-                favoriteProduct.getProduct(),
-                favoriteProduct.getUser().getId()
+                productResponse,
+                user.getId()
         );
 
         return messageBuilder.buildSuccessMessage(response);
     }
 
 
-    // Remove a product from the user's favorite list
+
     public RespMessage removeFavoriteProduct(FavoriteProductRequest request) {
         Optional<FavoriteProduct> favoriteProductOpt = favoriteProductRepository.findByUserIdAndProductId(request.getUserId(), request.getProductId());
 
