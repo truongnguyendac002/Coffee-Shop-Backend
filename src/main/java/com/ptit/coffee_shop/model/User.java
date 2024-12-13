@@ -88,6 +88,7 @@ public class User implements UserDetails {
 
     public ProfileResponse toProfileResponse() {
         return ProfileResponse.builder()
+                .id(id)
                 .email(email)
                 .name(name)
                 .phone(phone)

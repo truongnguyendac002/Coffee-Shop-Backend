@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +23,7 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final MessageBuilder messageBuilder;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
 
 
@@ -56,5 +59,20 @@ public class ProfileService {
         userRepository.save(user);
         return messageBuilder.buildSuccessMessage(user.toProfileResponse());
 
+    }
+
+    public RespMessage updateAvatar(MultipartFile file) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
+        if (userOptional.isEmpty())
+            throw new CoffeeShopException(Constant.UNAUTHORIZED, null, "User not found by email: " + userEmail + "get from token!");
+        User user = userOptional.get();
+        Map<String, Object> data = cloudinaryService.upload(file, "Avatar");
+        System.out.println(data);
+        String url = (String) data.get("url");
+        System.out.println();
+        user.setProfile_img(url);
+        userRepository.save(user);
+        return messageBuilder.buildSuccessMessage(user.toProfileResponse());
     }
 }

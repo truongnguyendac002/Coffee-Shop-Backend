@@ -157,8 +157,8 @@ public class OrderService {
         if (orderOptional.isPresent()) {
             Order order = orderOptional.get();
             if (order.getStatus().equals(OrderStatus.Processing)){
-                order.setStatus(OrderStatus.Awaiting);
-            } else if (order.getStatus().equals(OrderStatus.Awaiting)) {
+                order.setStatus(OrderStatus.Processed);
+            } else if (order.getStatus().equals(OrderStatus.Processed)) {
                 order.setStatus(OrderStatus.Shipping);
             } else if (order.getStatus().equals(OrderStatus.Shipping)) {
                 order.setStatus(OrderStatus.Completed);

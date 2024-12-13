@@ -30,10 +30,7 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
-    private List<Image> image;
-
-    @OneToOne()
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "default_image_id")
     private Image default_image;
 
@@ -58,11 +55,12 @@ public class Product {
     }
 
     public ProductResponse toProductResponse() {
+        List<Image> image = null;
+
         return ProductResponse.builder()
                 .id(id)
                 .name(name)
                 .description(description)
-                .image(image)
                 .default_image(default_image)
                 .category(category)
                 .brand(brand)

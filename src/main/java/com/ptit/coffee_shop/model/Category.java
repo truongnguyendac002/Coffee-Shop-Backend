@@ -28,9 +28,6 @@ public class Category {
 
     @Column(name = "default_image_url")
     private String defaultImageUrl;
-//    @OneToOne()
-//    @JoinColumn(name = "default_image_id")
-//    private Image defaultImage;
 
     @PrePersist
     public void prePersist() {

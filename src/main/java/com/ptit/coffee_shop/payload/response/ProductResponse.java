@@ -25,8 +25,6 @@ public class ProductResponse {
 
     private String description;
 
-    private List<Image> image;
-
     private Image default_image;
 
     private Category category;
@@ -36,6 +34,8 @@ public class ProductResponse {
     private Status status;
 
     private BigDecimal price;
+
+    private List<Image> images;
 
     private double rating;
 
