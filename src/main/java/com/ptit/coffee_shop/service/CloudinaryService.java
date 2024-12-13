@@ -36,12 +36,22 @@ public class CloudinaryService {
     }
 
     // Hàm phụ để trích xuất public_id từ URL
+//    private String extractPublicId(String imageUrl) {
+//        // Lấy phần public_id từ URL (bỏ phần trước v và .jpg)
+//        String[] urlParts = imageUrl.split("/v[0-9]+/");
+//        if (urlParts.length > 1) {
+//            // Lấy phần sau v và trước .jpg (public_id)
+//            return urlParts[1].replaceAll("\\.jpg$", "");
+//        }
+//        throw new IllegalArgumentException("Invalid URL format");
+//    }
+
     private String extractPublicId(String imageUrl) {
-        // Lấy phần public_id từ URL (bỏ phần trước v và .jpg)
+        // Lấy phần public_id từ URL (bỏ phần trước v và bỏ đuôi ảnh như .jpg, .png, .gif, .jpeg)
         String[] urlParts = imageUrl.split("/v[0-9]+/");
         if (urlParts.length > 1) {
-            // Lấy phần sau v và trước .jpg (public_id)
-            return urlParts[1].replaceAll("\\.jpg$", "");
+            // Loại bỏ đuôi file (ví dụ: .jpg, .png, .gif, .jpeg)
+            return urlParts[1].replaceAll("\\.[a-zA-Z]{3,4}$", "");
         }
         throw new IllegalArgumentException("Invalid URL format");
     }

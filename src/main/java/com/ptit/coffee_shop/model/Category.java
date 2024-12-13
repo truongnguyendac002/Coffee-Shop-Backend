@@ -26,10 +26,8 @@ public class Category {
     @Column(name = "Description")
     private String description;
 
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "default_image_id")
-    private Image defaultImage;
+    @Column(name = "default_image_url")
+    private String defaultImageUrl;
 
     @PrePersist
     public void prePersist() {

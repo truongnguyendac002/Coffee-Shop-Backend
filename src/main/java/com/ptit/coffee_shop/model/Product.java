@@ -34,11 +34,11 @@ public class Product {
     @JoinColumn(name = "default_image_id")
     private Image default_image;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "brand_id")
     private Brand brand;
 

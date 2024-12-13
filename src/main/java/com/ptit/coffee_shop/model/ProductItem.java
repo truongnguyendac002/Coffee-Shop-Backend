@@ -27,11 +27,11 @@ public class ProductItem {
     @Column(name = "discount")
     private double discount;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "type_id")
     private TypeProduct type;
 
