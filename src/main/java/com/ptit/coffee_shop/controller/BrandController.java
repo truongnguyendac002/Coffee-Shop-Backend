@@ -4,16 +4,14 @@ import com.ptit.coffee_shop.common.Constant;
 import com.ptit.coffee_shop.common.GsonUtil;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.model.Brand;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.service.BrandService;
 import com.ptit.coffee_shop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -48,4 +46,25 @@ public class BrandController {
         return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = "application/json")
+    public ResponseEntity<String> updateBrand(@PathVariable long id, @RequestBody Brand brand) {
+        try {
+            RespMessage respMessage = brandService.updateBrand(id,brand);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    public ResponseEntity<String> deleteBrand(@PathVariable long id) {
+        try {
+            RespMessage respMessage = brandService.deleteBrand(id);
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
+        } catch (CoffeeShopException e) {
+            RespMessage resp = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(), e.getMessage());
+            return new ResponseEntity<>(GsonUtil.getInstance().toJson(resp), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

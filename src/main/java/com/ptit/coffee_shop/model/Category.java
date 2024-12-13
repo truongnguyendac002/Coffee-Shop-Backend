@@ -26,10 +26,11 @@ public class Category {
     @Column(name = "Description")
     private String description;
 
-
-    @OneToOne()
-    @JoinColumn(name = "default_image_id")
-    private Image defaultImage;
+    @Column(name = "default_image_url")
+    private String defaultImageUrl;
+//    @OneToOne()
+//    @JoinColumn(name = "default_image_id")
+//    private Image defaultImage;
 
     @PrePersist
     public void prePersist() {
