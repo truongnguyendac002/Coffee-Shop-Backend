@@ -37,6 +37,7 @@ public class Transaction {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    // co can trong database khong ?
     @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;
