@@ -44,7 +44,7 @@ public class Review {
     }
 
     public ReviewResponse toResponse() {
-        return new ReviewResponse(id, orderItem.getOrder().getShippingAddress().getUser().getEmail(), orderItem.getOrder().getShippingAddress().getUser().getName(),
+        return new ReviewResponse(id, orderItem.getOrder().getShippingAddress().getUser().getEmail(), orderItem.getOrder().getShippingAddress().getUser().getId() , orderItem.getOrder().getShippingAddress().getUser().getName(),
                                     orderItem.getOrder().getShippingAddress().getUser().getProfile_img(), rating, comment, createAt);
     }
 }
