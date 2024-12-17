@@ -20,12 +20,10 @@ public class CartItem {
     @Column(name = "quantity")
     private int quantity;
 
-//    @ManyToOne(cascade = CascadeType.ALL)
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-//    @ManyToOne(cascade = CascadeType.ALL)
     @ManyToOne
     @JoinColumn(name = "product_item_id")
     private ProductItem productItem;

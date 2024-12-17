@@ -25,8 +25,6 @@ public class ProductResponse {
 
     private String description;
 
-    private Image default_image;
-
     private Category category;
 
     private Brand brand;

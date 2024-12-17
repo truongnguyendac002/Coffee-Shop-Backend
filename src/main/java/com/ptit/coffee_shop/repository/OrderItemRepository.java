@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
@@ -51,5 +53,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
                                                    @Param("year") int year,
                                                    Pageable pageable);
 
+    @Query("SELECT SUM(oi.amount) FROM OrderItem oi WHERE oi.productItem.product.id = :productId")
+    Optional<Integer> findTotalSold(long productId);
 
 }

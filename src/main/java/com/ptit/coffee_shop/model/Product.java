@@ -30,10 +30,6 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "default_image_id")
-    private Image default_image;
-
     @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
@@ -46,27 +42,9 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "price", nullable = false)
-    private BigDecimal price;
-
     @PrePersist
     public void prePersist() {
         if (status == null) status = Status.ACTIVE;
-    }
-
-    public ProductResponse toProductResponse() {
-        List<Image> image = null;
-
-        return ProductResponse.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .default_image(default_image)
-                .category(category)
-                .brand(brand)
-                .status(status)
-                .price(price)
-                .build();
     }
 
     public ProductStatisticResponse toStatisticResponse() {
