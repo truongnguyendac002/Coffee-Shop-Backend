@@ -37,7 +37,8 @@ public class WebConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("https://m.coffeeshoppro.online");
+        config.addAllowedOriginPattern("https://coffeeshoppro.online");
+        config.addAllowedOriginPattern("https://www.coffeeshoppro.online");
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");

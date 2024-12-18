@@ -124,7 +124,7 @@
 				<version>2.9.0</version>
 			    <configuration>
 			        <schemaVersion>v2</schemaVersion>
-			        <resourceGroup>coffee-group</resourceGroup>
+			        <resourceGroup>coffee-shop-backend</resourceGroup>
 			        <appName>coffee-shop-backend</appName>
 			        <pricingTier>B1</pricingTier>
 					<region>Southeast Asia</region>
