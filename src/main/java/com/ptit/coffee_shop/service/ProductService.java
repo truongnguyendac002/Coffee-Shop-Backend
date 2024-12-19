@@ -242,7 +242,7 @@ public class ProductService {
         Product product = productOptional.get();
         try {
             Map<String, Object> data = cloudinaryService.upload(file, "Product");
-            String url = (String) data.get("url");
+            String url = (String) data.get("secure_url");
             Image image = new Image();
             image.setUrl(url);
             image.setProduct(product);

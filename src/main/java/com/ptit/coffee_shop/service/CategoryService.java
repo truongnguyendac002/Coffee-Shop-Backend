@@ -50,7 +50,7 @@ public class CategoryService {
             try {
                 Map uploadResult = cloudinaryService.upload(imageFile, "categories");
 
-                String imageUrl = (String) uploadResult.get("url");
+                String imageUrl = (String) uploadResult.get("secure_url");
                 category.setDefaultImageUrl(imageUrl);
             } catch (Exception e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Failed to upload image file");
@@ -83,7 +83,7 @@ public class CategoryService {
 
             try {
                 Map uploadResult = cloudinaryService.upload(imageFile, "categories");
-                String imageUrl = (String) uploadResult.get("url");
+                String imageUrl = (String) uploadResult.get("secure_url");
                 existingCategory.setDefaultImageUrl(imageUrl);
             } catch (Exception e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Failed to upload image file");
