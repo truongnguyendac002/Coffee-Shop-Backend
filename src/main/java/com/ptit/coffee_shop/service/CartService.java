@@ -147,7 +147,7 @@ public class CartService {
         return messageBuilder.buildSuccessMessage("Delete cart Item successfully");
     }
 
-    private ProductItemResponse toProductItemResponse(ProductItem productItem) {
+    public ProductItemResponse toProductItemResponse(ProductItem productItem) {
         return ProductItemResponse.builder()
                 .id(productItem.getId())
                 .price(productItem.getPrice())

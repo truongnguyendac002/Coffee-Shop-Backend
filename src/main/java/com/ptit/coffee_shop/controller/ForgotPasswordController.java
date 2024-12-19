@@ -75,8 +75,15 @@ public class ForgotPasswordController {
         }
 
         User user = optionalUser.get();
-        ForgotPassword forgotPassword = forgotPasswordRepository.findByOtpAndUser(otp,user)
-                .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+        ForgotPassword forgotPassword = forgotPasswordRepository.findByOtpAndUser(otp, user)
+                .orElse(null);
+
+        if (forgotPassword == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(RespMessage.builder()
+                    .respCode("104")
+                    .respDesc("OTP không hợp lệ")
+                    .build() );
+        }
 
         if (forgotPassword.getExpirationTime().before(Date.from(Instant.now()))) {
             forgotPasswordRepository.deleteById(forgotPassword.getId());

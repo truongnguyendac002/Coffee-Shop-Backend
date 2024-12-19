@@ -8,6 +8,7 @@ import com.ptit.coffee_shop.model.Product;
 import com.ptit.coffee_shop.model.ProductItem;
 import com.ptit.coffee_shop.model.TypeProduct;
 import com.ptit.coffee_shop.payload.request.ProductItemRequest;
+import com.ptit.coffee_shop.payload.response.ProductItemResponse;
 import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.repository.ProductItemRepository;
 import com.ptit.coffee_shop.repository.ProductRepository;
@@ -27,6 +28,7 @@ public class ProductItemService {
     public final ProductRepository productRepository;
     public final TypeProductRepository typeProductRepository;
     public final MessageBuilder messageBuilder;
+    private  final  CartService cartService;
 
     public RespMessage addProductItem(ProductItemRequest request) {
         if (request.getPrice() < 0) {
@@ -68,11 +70,21 @@ public class ProductItemService {
         return messageBuilder.buildSuccessMessage(productItem);
     }
 
+//    public RespMessage getProductItem(Long productId) {
+//        List<ProductItem> productItems = productItemRepository.findByProductId(productId);
+//        List<ProductItem> activeProductItems = productItems.stream().filter(productItem -> productItem.getStatus() == Status.ACTIVE).toList();
+//        return messageBuilder.buildSuccessMessage(activeProductItems);
+//    }
+
     public RespMessage getProductItem(Long productId) {
         List<ProductItem> productItems = productItemRepository.findByProductId(productId);
-        List<ProductItem> activeProductItems = productItems.stream().filter(productItem -> productItem.getStatus() == Status.ACTIVE).toList();
-        return messageBuilder.buildSuccessMessage(activeProductItems);
+        List<ProductItemResponse> activeProductItemResponses = productItems.stream()
+                .filter(productItem -> productItem.getStatus() == Status.ACTIVE)
+                .map(cartService::toProductItemResponse)
+                .toList();
+        return messageBuilder.buildSuccessMessage(activeProductItemResponses);
     }
+
 
     public RespMessage updateProductItem(ProductItemRequest request, long id) {
         if (request.getPrice() < 0) {
