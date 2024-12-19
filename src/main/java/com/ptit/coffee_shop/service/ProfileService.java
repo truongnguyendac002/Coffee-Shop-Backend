@@ -69,7 +69,7 @@ public class ProfileService {
         User user = userOptional.get();
         Map<String, Object> data = cloudinaryService.upload(file, "Avatar");
         System.out.println(data);
-        String url = (String) data.get("url");
+        String url = (String) data.get("secure_url");
         System.out.println();
         user.setProfile_img(url);
         userRepository.save(user);

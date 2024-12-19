@@ -37,6 +37,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final MessageBuilder messageBuilder;
+    private final ChatService chatService;
 
     // Login method
     public RespMessage login(LoginRequest loginRequest) {
@@ -83,6 +84,7 @@ public class AuthService {
                 .status(Status.ACTIVE)
                 .build();
         userRepository.save(user);
+        chatService.createConversation(user.getId());
         RespMessage respMessage = messageBuilder.buildSuccessMessage(null);
         return respMessage;
     }
