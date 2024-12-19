@@ -9,6 +9,8 @@ public class Constant {
         public static final String FIELD_NOT_VALID = "101";
         public static final String FIELD_EXISTED = "102";
         public static final String FIELD_NOT_FOUND = "103";
+        public static final String FIELD_EXPIRED = "104";
+
         public static final String UNDEFINED = "Undefined";
         public static final String SYSTEM_ERROR = "500";
         public static final String NOT_FOUND = "404";
