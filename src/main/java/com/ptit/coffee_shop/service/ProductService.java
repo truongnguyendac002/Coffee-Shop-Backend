@@ -154,7 +154,7 @@ public class ProductService {
 
     @Transactional
     public RespMessage addBrand(String name) {
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Brand name must be not null");
         }
         if (brandRepository.findByName(name).isPresent()) {

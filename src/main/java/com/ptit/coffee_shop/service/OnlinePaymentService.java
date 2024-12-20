@@ -131,10 +131,17 @@ public class OnlinePaymentService {
     }
 
     @Transactional
-    public RespMessage handleVNPayRefund(long transactionId, HttpServletRequest request) {
+    public RespMessage handleVNPayRefund(long orderId, HttpServletRequest request) {
         try {
             String vnp_RequestId = OnlinePaymentConfig.getRandomNumber(8);
-            Transaction transaction = transactionRepository.getOne(transactionId);
+            Optional<Transaction> transactionOptional = transactionRepository.findByOrderId(orderId);
+            Transaction transaction = new Transaction();
+            if( transactionOptional.isPresent() ) {
+                transaction = transactionOptional.get();
+            } else {
+                throw new RuntimeException("Transaction not found");
+            }
+
             String vnp_TxnRef = transaction.getTxnRef();
 
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -142,9 +149,9 @@ public class OnlinePaymentService {
             String vnp_TransactionDate = formatter.format(cld.getTime());
             String vnp_CreateDate = formatter.format(transaction.getPayDate());
             String vnp_IpAddr = OnlinePaymentConfig.getIpAddress(request);
-            String vnp_Amount = String.valueOf((int) (transaction.getAmount()*100));
+            String vnp_Amount = String.valueOf((int) (transaction.getAmount()));
             String vnp_TransactionNo = transaction.getTransactionNo();
-            String vnp_CreateBy = transaction.getUser().getName();
+            String vnp_CreateBy = transaction.getOrder().getShippingAddress().getUser().getEmail();
             String vnp_OrderInfo = "Hoan tien GD OrderId:" + vnp_TxnRef;
 
 
@@ -209,15 +216,14 @@ public class OnlinePaymentService {
                 transaction1.setAmount(transaction.getAmount());
                 transaction1.setCommand("refund");
                 transaction1.setOrder(transaction.getOrder());
-                transaction1.setUser(transaction.getUser());
-                Optional<Order> order = orderRepository.findById(transaction.getOrder().getId());
+                Optional<Order> order = orderRepository.findById(orderId);
                 if (order.isPresent()) {
                     Order order1 = order.get();
                     order1.setStatus(OrderStatus.Cancelled);
                     try {
                         orderRepository.save(order1);
                         transactionRepository.save(transaction1);
-                        return messageBuilder.buildSuccessMessage(transaction1);
+                        return messageBuilder.buildSuccessMessage(transaction1.toTransactionResponse());
                     } catch (CoffeeShopException e ){
                         throw new CoffeeShopException(Constant.SYSTEM_ERROR,null, "Cannot save transaction");
                     }
