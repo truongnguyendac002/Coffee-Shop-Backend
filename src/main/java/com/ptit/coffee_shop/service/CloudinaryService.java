@@ -15,10 +15,15 @@ public class CloudinaryService {
     private final Cloudinary cloudinary;
 
     public Map upload(MultipartFile file, String folder) {
-        try{
-            Map data = this.cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", folder));
+        try {
+            Map data = this.cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                            "folder", folder,
+                            "quality", "auto",
+                            "fetch_format", "auto"
+                    )
+            );
             return data;
-        }catch (IOException io){
+        } catch (IOException io) {
             throw new RuntimeException("Image upload fail");
         }
     }
@@ -35,18 +40,8 @@ public class CloudinaryService {
         }
     }
 
-    // Hàm phụ để trích xuất public_id từ URL
-//    private String extractPublicId(String imageUrl) {
-//        // Lấy phần public_id từ URL (bỏ phần trước v và .jpg)
-//        String[] urlParts = imageUrl.split("/v[0-9]+/");
-//        if (urlParts.length > 1) {
-//            // Lấy phần sau v và trước .jpg (public_id)
-//            return urlParts[1].replaceAll("\\.jpg$", "");
-//        }
-//        throw new IllegalArgumentException("Invalid URL format");
-//    }
-
     private String extractPublicId(String imageUrl) {
+        imageUrl = imageUrl.replace("upload/", "upload/q_auto,f_auto/");
         // Lấy phần public_id từ URL (bỏ phần trước v và bỏ đuôi ảnh như .jpg, .png, .gif, .jpeg)
         String[] urlParts = imageUrl.split("/v[0-9]+/");
         if (urlParts.length > 1) {
@@ -55,7 +50,6 @@ public class CloudinaryService {
         }
         throw new IllegalArgumentException("Invalid URL format");
     }
-
 
 
 }

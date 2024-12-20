@@ -28,13 +28,14 @@ public class ProductService {
     private final MessageBuilder messageBuilder;
     private final CloudinaryService cloudinaryService;
     private final ImageRepository imageRepository;
+    private final OrderItemRepository orderItemRepository;
     public RespMessage getAllProduct() {
         List<Product> products = productRepository.findAll();
         List<Product> activeProducts = products.stream().filter(product -> product.getStatus() == Status.ACTIVE).toList();
         List<ProductResponse> productResponseList = new ArrayList<>();
         for (Product product : activeProducts) {
             List<Image> images = imageRepository.findByProduct(product);
-            ProductResponse productResponse = product.toProductResponse();
+            ProductResponse productResponse = getProductResponse(product);
             productResponse.setImages(images);
             productResponseList.add(productResponse);
         }
@@ -45,7 +46,7 @@ public class ProductService {
         Optional<Product> productOp = productRepository.findById(id);
         if (productOp.isPresent()) {
             Product product = productOp.get();
-            ProductResponse productResponse = product.toProductResponse();
+            ProductResponse productResponse = getProductResponse(product);
             List<Image> images = imageRepository.findByProduct(product);
             productResponse.setImages(images);
             return messageBuilder.buildSuccessMessage(productResponse);
@@ -56,8 +57,12 @@ public class ProductService {
     public RespMessage getProductsByCategoryId(Long categoryId) {
         try {
             List<Product> products = productRepository.findByCategoryId(categoryId);
-
-            return messageBuilder.buildSuccessMessage(products);
+            List<ProductResponse> productResponseList = new ArrayList<>();
+            for (Product product : products) {
+                ProductResponse productResponse = getProductResponse(product);
+                productResponseList.add(productResponse);
+            }
+            return messageBuilder.buildSuccessMessage(productResponseList);
         } catch (Exception e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, null , null);
         }
@@ -69,11 +74,14 @@ public class ProductService {
         try {
             List<Product> products = productRepository.searchByKeyword(keyword);
             if (products.isEmpty()) {
-                // Xây dựng phản hồi thất bại nếu không tìm thấy sản phẩm
                 return messageBuilder.buildFailureMessage(Constant.FIELD_NOT_FOUND, null, null);
             }
-            // Xây dựng phản hồi thành công nếu tìm thấy sản phẩm
-            return messageBuilder.buildSuccessMessage(products);
+            List<ProductResponse> productResponseList = new ArrayList<>();
+            for (Product product : products) {
+                ProductResponse productResponse = getProductResponse(product);
+                productResponseList.add(productResponse);
+            }
+            return messageBuilder.buildSuccessMessage(productResponseList);
         } catch (Exception e) {
             // Xây dựng phản hồi thất bại khi có lỗi
             return messageBuilder.buildFailureMessage(Constant.SYSTEM_ERROR, null, null);
@@ -105,13 +113,12 @@ public class ProductService {
         product.setDescription(productRequest.getDescription());
         product.setCategory(categoryOptional.get());
         product.setBrand(brandOptional.get());
-        product.setPrice(productRequest.getPrice());
         try {
             productRepository.save(product);
         } catch (Exception e) {
             throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e.getMessage()}, "Error when add product");
         }
-        return messageBuilder.buildSuccessMessage(product);
+        return messageBuilder.buildSuccessMessage(getProductResponse(product));
     }
 
     @Transactional
@@ -189,7 +196,7 @@ public class ProductService {
         Product product = productOptional.get();
         product.setStatus(Status.INACTIVE);
         productRepository.save(product);
-        return messageBuilder.buildSuccessMessage(product);
+        return messageBuilder.buildSuccessMessage(getProductResponse(product));
     }
 
     public RespMessage updateProduct(Long id, ProductRequest request) {
@@ -219,7 +226,7 @@ public class ProductService {
             product.setBrand(brandOptional.get());
         }
         productRepository.save(product);
-        return messageBuilder.buildSuccessMessage(product);
+        return messageBuilder.buildSuccessMessage(getProductResponse(product));
     }
 
     public RespMessage getAllTypeProduct() {
@@ -235,7 +242,7 @@ public class ProductService {
         Product product = productOptional.get();
         try {
             Map<String, Object> data = cloudinaryService.upload(file, "Product");
-            String url = (String) data.get("url");
+            String url = (String) data.get("secure_url");
             Image image = new Image();
             image.setUrl(url);
             image.setProduct(product);
@@ -248,10 +255,45 @@ public class ProductService {
     }
 
     public ProductResponse getProductResponse(Product product) {
-        List<Image> images = imageRepository.findByProduct(product);
-        ProductResponse productResponse = product.toProductResponse();
-        productResponse.setImages(images);
-        return productResponse;
+        try {
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(product.getId());
+            productResponse.setName(product.getName());
+            productResponse.setDescription(product.getDescription());
+            productResponse.setCategory(product.getCategory());
+            productResponse.setBrand(product.getBrand());
+
+            List<Image> images = imageRepository.findByProduct(product);
+            productResponse.setImages(images);
+
+            List<Review> reviews = reviewRepository.findByProductId(product.getId());
+            double rating = 0;
+            int totalReview = 0;
+
+            if (!reviews.isEmpty()) {
+                rating = reviews.stream().mapToDouble(Review::getRating).average().getAsDouble();
+                totalReview = reviews.size();
+            }
+            productResponse.setRating(rating);
+            productResponse.setTotalReview(totalReview);
+
+            Integer totalSold = orderItemRepository.findTotalSold(product.getId())
+                    .orElse(0);
+            productResponse.setTotalSold(totalSold);
+
+            Double maxPrice = productRepository.maxPrice(product.getId())
+                    .orElse(0.0);
+            productResponse.setMaxPrice(maxPrice);
+
+            Double minPrice = productRepository.minPrice(product.getId())
+                    .orElse(0.0);
+            productResponse.setMinPrice(minPrice);
+
+            return productResponse;
+        }
+        catch (Exception e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e.getMessage()}, "Error when get product response");
+        }
     }
 
     public RespMessage deleteImage(Long id) {

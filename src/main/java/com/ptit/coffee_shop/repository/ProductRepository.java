@@ -16,4 +16,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> searchByKeyword(String keyword);
 
     List<Product> findByCategoryId(Long categoryId);
+
+    @Query("SELECT MAX(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId")
+    Optional<Double> maxPrice(long productId);
+
+    @Query("SELECT MIN(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId")
+    Optional<Double> minPrice(long productId);
 }

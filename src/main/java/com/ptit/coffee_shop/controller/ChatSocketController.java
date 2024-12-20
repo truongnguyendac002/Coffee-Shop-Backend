@@ -31,7 +31,7 @@ public class ChatSocketController {
             @DestinationVariable long conversationId,
             ChatMessageRequest message) {
         try {
-            RespMessage conversationResponse = chatService.updateConversation(message, conversationId);
+            RespMessage conversationResponse = chatService.updateMessage(message, conversationId);
             String response = GsonUtil.getInstance().toJson(conversationResponse);
             simpMessageSendingOperations.convertAndSend("/topic/admin" , response);
             return response;

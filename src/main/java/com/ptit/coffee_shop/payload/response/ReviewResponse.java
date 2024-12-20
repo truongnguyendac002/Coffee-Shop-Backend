@@ -13,6 +13,7 @@ import java.util.Date;
 public class ReviewResponse {
     private long id;
     private String userEmail;
+    private long userId;
     private String Name;
     private String userAvatar;
     private double rating;

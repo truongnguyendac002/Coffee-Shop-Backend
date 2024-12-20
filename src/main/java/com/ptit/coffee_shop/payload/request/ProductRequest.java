@@ -19,6 +19,5 @@ public class ProductRequest {
     private long categoryId;
     @JsonProperty("BrandId")
     private long brandId;
-    @JsonProperty("Price")
-    private BigDecimal price = BigDecimal.valueOf(50.00); // Giá mặc định là 50$
+
 }
