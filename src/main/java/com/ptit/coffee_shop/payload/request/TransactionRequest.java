@@ -26,6 +26,4 @@ public class TransactionRequest {
     @JsonProperty("OrderId")
     private long orderId;
 
-    @JsonProperty("UserId")
-    private long userId;
 }

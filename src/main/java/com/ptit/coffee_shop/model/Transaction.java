@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.model;
 
+import com.ptit.coffee_shop.payload.response.TransactionResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,8 +38,15 @@ public class Transaction {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    // co can trong database khong ?
-    @ManyToOne()
-    @JoinColumn(name = "user_id")
-    private User user;
+    public TransactionResponse toTransactionResponse() {
+        return TransactionResponse.builder()
+                .transactionId(id)
+                .transactionNo(transactionNo)
+                .txnRef(txnRef)
+                .payDate(payDate)
+                .amount(amount)
+                .command(command)
+                .orderId(order.getId())
+                .build();
+    }
 }
