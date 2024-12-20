@@ -5,6 +5,7 @@ import com.ptit.coffee_shop.common.enums.RoleEnum;
 import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
+import com.ptit.coffee_shop.payload.request.ChangePasswordDTO;
 import com.ptit.coffee_shop.payload.request.LoginRequest;
 import com.ptit.coffee_shop.payload.request.RegisterRequest;
 import com.ptit.coffee_shop.model.Role;
@@ -162,4 +163,34 @@ public class AuthService {
                 .build();
     }
 
+    public RespMessage changePassword(ChangePasswordDTO changePasswordDTO) {
+        checkChangePasswordDTO(changePasswordDTO);
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found when change password"));
+
+        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"ChangePasswordDTO.OldPassword"}, "Old password not correct");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        userRepository.save(user);
+        return messageBuilder.buildSuccessMessage("Update password successfully");
+    }
+
+    private void checkChangePasswordDTO(ChangePasswordDTO changePasswordDTO) {
+        if (changePasswordDTO.getOldPassword() == null || changePasswordDTO.getOldPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"ChangePasswordDTO.OldPassword"}, "Old password must be not null");
+        }
+        if (changePasswordDTO.getNewPassword() == null || changePasswordDTO.getNewPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"ChangePasswordDTO.NewPassword"}, "New password must be not null");
+        }
+        if (changePasswordDTO.getConfirmPassword() == null || changePasswordDTO.getConfirmPassword().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"ChangePasswordDTO.ConfirmPassword"}, "Confirm password must be not null");
+        }
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmPassword())) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"ChangePasswordDTO.NewPassword"}, "New password and confirm password must be the same");
+        }
+    }
 }
