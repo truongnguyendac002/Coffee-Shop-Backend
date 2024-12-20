@@ -26,15 +26,9 @@ public class TransactionService {
     private final MessageBuilder messageBuilder;
 
     public RespMessage addTransaction(TransactionRequest transactionRequest) {
-        Optional<User> userOptional = userRepository.findById(transactionRequest.getUserId());
-        if (userOptional.isEmpty()) {
-            throw new CoffeeShopException(Constant.NOT_FOUND, null, "User not found");
-        }
         Optional<Order> orderOptional = orderRepository.findById(transactionRequest.getOrderId());
         if (orderOptional.isPresent()) {
-            User user = userOptional.get();
             Transaction transaction = new Transaction();
-            transaction.setUser(user);
             transaction.setOrder(orderOptional.get());
             transaction.setAmount(transactionRequest.getAmount());
             transaction.setTransactionNo(transactionRequest.getTransactionNo());
@@ -43,7 +37,7 @@ public class TransactionService {
             transaction.setTxnRef(transactionRequest.getTxnRef());
             try {
                 transactionRepository.save(transaction);
-                return messageBuilder.buildSuccessMessage(transaction);
+                return messageBuilder.buildSuccessMessage(transaction.toTransactionResponse());
             } catch (CoffeeShopException e) {
                 throw new CoffeeShopException(Constant.UNDEFINED, null, "Transaction could not be saved");
             }
@@ -56,7 +50,7 @@ public class TransactionService {
         Optional<Transaction> transactionOptional = transactionRepository.findByOrderId(orderId);
         if (transactionOptional.isPresent()) {
             Transaction transaction = transactionOptional.get();
-            return messageBuilder.buildSuccessMessage(transaction);
+            return messageBuilder.buildSuccessMessage(transaction.toTransactionResponse());
         }
         throw new CoffeeShopException(Constant.NOT_FOUND, null, "Transaction not found");
     }

@@ -28,9 +28,15 @@ public class BrandService {
     }
 
     public RespMessage updateBrand(long id, Brand currentBrand){
+        if (currentBrand.getName() == null || currentBrand.getName().trim().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Brand name must be not null");
+        }
         Optional<Brand> brand = brandRepository.findById(id);
         if(brand.isPresent()){
             Brand brandEntity = brand.get();
+            if (!brandEntity.getName().equals(currentBrand.getName()) && brandRepository.findByName(currentBrand.getName()).isPresent()) {
+                throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"name"}, "Brand name is duplicate");
+            }
             brandEntity.setName(currentBrand.getName());
             try {
                 brandRepository.save(brandEntity);

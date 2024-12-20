@@ -52,9 +52,9 @@ public class OnlinePaymentController {
     }
 
     @RequestMapping(value = "",method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<String> handleVNPayRefund(@RequestParam long transactionId, HttpServletRequest request) {
+    public ResponseEntity<String> handleVNPayRefund(@RequestParam long orderId, HttpServletRequest request) {
         try {
-            RespMessage respMessage = onlinePaymentService.handleVNPayRefund(transactionId, request);
+            RespMessage respMessage = onlinePaymentService.handleVNPayRefund(orderId, request);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(), e.getObjects(),e.getMessage());

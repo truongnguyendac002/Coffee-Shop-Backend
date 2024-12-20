@@ -193,7 +193,6 @@ public class OrderService {
                     Transaction transaction = transactionOptional.get();
                     transaction1.setTransactionNo(transaction.getTransactionNo());
                     transaction1.setAmount(transaction.getAmount());
-                    transaction1.setUser(transaction.getUser());
                     transaction1.setOrder(transaction.getOrder());
                     transaction1.setCommand("refund");
                     transaction1.setTxnRef(transaction.getTxnRef());

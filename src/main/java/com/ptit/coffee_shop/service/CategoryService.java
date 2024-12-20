@@ -37,15 +37,15 @@ public class CategoryService {
     }
 
     public RespMessage addCategory(String name, String description, MultipartFile imageFile) {
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Category name must be not null");
         }
         if (categoryRepository.findByName(name).isPresent()) {
             throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"name"}, "Category name is duplicate");
         }
         Category category = new Category();
-        category.setName(name);
-        category.setDescription(description);
+        category.setName(name.trim());
+        category.setDescription(description.trim());
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 Map uploadResult = cloudinaryService.upload(imageFile, "categories");
@@ -65,26 +65,34 @@ public class CategoryService {
     }
 
     public RespMessage updateCategory(Long id, String name, String description, MultipartFile imageFile) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Category name must be not null");
+        }
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        existingCategory.setName(name);
-        existingCategory.setDescription(description);
+        if ( !existingCategory.getName().equals(name) && categoryRepository.findByName(name).isPresent()) {
+            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"name"}, "Category name is duplicate");
+        }
+        existingCategory.setName(name.trim());
+        existingCategory.setDescription(description.trim());
         existingCategory.setStatus(Status.ACTIVE);
 
-        if (imageFile != null && !imageFile.isEmpty()) {
-            if (existingCategory.getDefaultImageUrl() != null) {
-                try {
-                    cloudinaryService.delete(existingCategory.getDefaultImageUrl());
-                } catch (Exception e) {
-                    throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Image could not be deleted");
-                }
+        if (existingCategory.getDefaultImageUrl() != null && !existingCategory.getDefaultImageUrl().isEmpty()) {
+            try {
+                cloudinaryService.delete(existingCategory.getDefaultImageUrl());
+            } catch (Exception e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Image could not be deleted");
             }
+        }
 
+        existingCategory.setDefaultImageUrl(null);
+
+        if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 Map uploadResult = cloudinaryService.upload(imageFile, "categories");
                 String imageUrl = (String) uploadResult.get("url");
                 existingCategory.setDefaultImageUrl(imageUrl);
+                System.out.println(imageUrl);
             } catch (Exception e) {
                 throw new CoffeeShopException(Constant.SYSTEM_ERROR, null, "Failed to upload image file");
             }
