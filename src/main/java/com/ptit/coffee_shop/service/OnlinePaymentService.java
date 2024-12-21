@@ -15,6 +15,7 @@ import com.ptit.coffee_shop.repository.OrderRepository;
 import com.ptit.coffee_shop.repository.TransactionRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.view.RedirectView;
@@ -38,6 +39,10 @@ public class OnlinePaymentService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Value("${react.base-url}")
+    private String reactBaseUrl;
+
 
     public RespMessage createVNPayPayment(int amount, HttpServletRequest request) {
         if (amount <= 0) {
@@ -111,22 +116,22 @@ public class OnlinePaymentService {
         }
     }
 
-    public RedirectView handleVNPayReturn(HttpServletRequest request){
+    public RedirectView handleVNPayReturn(HttpServletRequest request) {
         String responseCode = request.getParameter("vnp_ResponseCode");
         RedirectView redirectView = new RedirectView();
         String status = responseCode.equals("00") ? "success" : "fail";
-        if(responseCode.equals("00")) {
-            redirectView.setUrl("http://localhost:3000/order-status"
-                        + "?status=" + status
-                        + "&txnRef=" + request.getParameter("vnp_TxnRef")
-                        + "&transactionNo=" + request.getParameter("vnp_TransactionNo")
-                        + "&amount=" + request.getParameter("vnp_Amount")
-                        + "&payDate=" + request.getParameter("vnp_PayDate"));
-        } else {
-            redirectView.setUrl("http://localhost:3000/order-status"
-                    + "?status=" + status
-                    + "&txnRef=" + request.getParameter("vnp_TxnRef"));
+
+        String url = reactBaseUrl + "/order-status"
+                + "?status=" + status
+                + "&txnRef=" + request.getParameter("vnp_TxnRef");
+
+        if (responseCode.equals("00")) {
+            url += "&transactionNo=" + request.getParameter("vnp_TransactionNo")
+                    + "&amount=" + request.getParameter("vnp_Amount")
+                    + "&payDate=" + request.getParameter("vnp_PayDate");
         }
+
+        redirectView.setUrl(url);
         return redirectView;
     }
 
