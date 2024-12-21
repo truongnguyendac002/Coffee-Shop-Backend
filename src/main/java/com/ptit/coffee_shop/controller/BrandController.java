@@ -11,6 +11,7 @@ import com.ptit.coffee_shop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ public class BrandController {
     private final BrandService brandService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> addBrand(@RequestBody Map<String, String> payload) {
         String name = payload.get("name");
         try {
@@ -47,6 +49,7 @@ public class BrandController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateBrand(@PathVariable long id, @RequestBody Brand brand) {
         try {
             RespMessage respMessage = brandService.updateBrand(id,brand);
@@ -58,6 +61,7 @@ public class BrandController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteBrand(@PathVariable long id) {
         try {
             RespMessage respMessage = brandService.deleteBrand(id);

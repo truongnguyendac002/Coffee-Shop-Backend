@@ -12,6 +12,7 @@ import com.ptit.coffee_shop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ public class CategoryController {
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json",
                         consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> addCategory(@RequestParam("name") String name, @RequestParam("description") String description,
                                               @RequestParam(value = "image", required = false) MultipartFile imageFile) {
         try {
@@ -64,6 +66,7 @@ public class CategoryController {
 
     @RequestMapping(value = "/{id}" , method = RequestMethod.PUT , produces = "application/json",
                     consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateCategory (@PathVariable Long id,
                                                   @RequestParam("name") String name, @RequestParam("description") String description,
                                                   @RequestParam(value = "image", required = false) MultipartFile imageFile) {
@@ -77,6 +80,7 @@ public class CategoryController {
     }
 
     @RequestMapping(value = "/{id}" , method = RequestMethod.DELETE , produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteCategory (@PathVariable long id) {
         try {
             RespMessage respMessage = categoryService.deleteCategory(id);

@@ -10,6 +10,8 @@ import com.ptit.coffee_shop.payload.response.RespMessage;
 import com.ptit.coffee_shop.payload.response.UserDTO;
 import com.ptit.coffee_shop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class UserService {
     @Autowired
     private MessageBuilder messageBuilder;
 
-    public RespMessage getAllUsers(){
+    public RespMessage getAllUsers() {
         List<User> users = userRepository.getAllUser();
         List<UserDTO> userDTOS = new ArrayList<>();
         for (User user : users) {
@@ -41,31 +43,29 @@ public class UserService {
         return messageBuilder.buildSuccessMessage(userDTOS);
     }
 
-    public RespMessage getUserById(Long userId){
-        Optional<User> userOptional = userRepository.findById(userId);
-        if(userOptional.isPresent()) {
-            User user = userOptional.get();
-            UserDTO userDTO = new UserDTO();
-            userDTO.setId(user.getId());
-            userDTO.setName(user.getName());
-            userDTO.setEmail(user.getEmail());
-            userDTO.setPhone(user.getPhone());
-            userDTO.setProfile_img(user.getProfile_img());
-            userDTO.setStatus(user.getStatus().toString());
-            userDTO.setRoleName("ROLE_USER");
-            return messageBuilder.buildSuccessMessage(userDTO);
-        } else {
-            throw new RuntimeException("User not found with ID: " + userId);
-        }
+    public RespMessage getUserById() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found when change password"));
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setName(user.getName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setProfile_img(user.getProfile_img());
+        userDTO.setStatus(user.getStatus().toString());
+        userDTO.setRoleName("ROLE_USER");
+        return messageBuilder.buildSuccessMessage(userDTO);
     }
 
-    public Optional<User> getUserByEmail(String email){
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public RespMessage banUser(Long userId){
+    public RespMessage banUser(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
-        if(optionalUser.isPresent()){
+        if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             user.setStatus(Status.INACTIVE);
             UserDTO newUserDTO = new UserDTO();
@@ -79,7 +79,7 @@ public class UserService {
                 userRepository.save(user);
                 return messageBuilder.buildSuccessMessage(newUserDTO);
             } catch (CoffeeShopException e) {
-                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"User could not be banned");
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"}, "User could not be banned");
             }
         }
         throw new RuntimeException("User not found with ID: " + userId);
@@ -100,28 +100,28 @@ public class UserService {
             try {
                 userRepository.save(user);
                 return messageBuilder.buildSuccessMessage(updatedUserDTO);
-            }catch (CoffeeShopException e) {
-                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"User could not be unbanned");
+            } catch (CoffeeShopException e) {
+                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"}, "User could not be unbanned");
             }
         }
         throw new RuntimeException("User not found with ID: " + userId);
     }
 
-    public RespMessage updateUserInfo(Long userId, UserRequest updatedUser){
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isPresent()) {
-            User currentUser = optionalUser.get();
-            currentUser.setName(updatedUser.getName());
-            currentUser.setPhone(updatedUser.getPhone());
-            currentUser.setUpdated_at(new Date());
-            currentUser.setProfile_img(updatedUser.getProfileImg());
-            try {
-                userRepository.save(currentUser);
-                return messageBuilder.buildSuccessMessage(updatedUser);
-            } catch (CoffeeShopException e) {
-                throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"},"UserInfo could not be updated");
-            }
+    public RespMessage updateUserInfo(UserRequest updatedUser) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CoffeeShopException(Constant.FIELD_NOT_FOUND, new Object[]{"User"}, "User not found when change password"));
+        currentUser.setName(updatedUser.getName());
+        currentUser.setPhone(updatedUser.getPhone());
+        currentUser.setUpdated_at(new Date());
+        currentUser.setProfile_img(updatedUser.getProfileImg());
+        try {
+            userRepository.save(currentUser);
+            return messageBuilder.buildSuccessMessage(updatedUser);
+        } catch (CoffeeShopException e) {
+            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{"user"}, "UserInfo could not be updated");
         }
-        throw new RuntimeException("User not found with ID: " + userId);
     }
 }
+
