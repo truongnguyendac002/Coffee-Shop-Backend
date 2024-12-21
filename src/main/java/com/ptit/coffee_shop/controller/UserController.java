@@ -73,7 +73,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> updateUserProfile(@PathVariable Long userId, @RequestBody UserRequest updatedUser) {
         try {
-            RespMessage respMessage = userService.updateUserInfo(userId, updatedUser);
+            RespMessage respMessage = userService.updateUserInfo(updatedUser);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch (CoffeeShopException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(e.getCode(),e.getObjects(),e.getMessage());
@@ -88,7 +88,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<String> getUserInfo(@PathVariable Long userId) {
         try {
-            RespMessage respMessage = userService.getUserById(userId);
+            RespMessage respMessage = userService.getUserById();
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
         } catch ( RuntimeException e) {
             RespMessage respMessage = messageBuilder.buildFailureMessage(Constant.NOT_FOUND, null, e.getMessage());

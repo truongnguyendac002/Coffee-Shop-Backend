@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.bridge.MessageUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,6 +36,7 @@ public class ReviewController {
 
 
     @RequestMapping(value = "/{reviewId}", method = RequestMethod.DELETE, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteReview(@PathVariable("reviewId") long reviewId) {
         try {
             RespMessage respMessage = reviewService.deleteReview(reviewId);

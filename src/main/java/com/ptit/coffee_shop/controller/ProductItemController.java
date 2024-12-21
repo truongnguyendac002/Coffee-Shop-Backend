@@ -10,6 +10,7 @@ import com.ptit.coffee_shop.service.ProductItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ public class ProductItemController {
     public final MessageBuilder messageBuilder;
 
     @RequestMapping(value = "", method = RequestMethod.POST, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> addProductItem(@RequestBody ProductItemRequest request) {
         try {
             RespMessage respMessage = productItemService.addProductItem(request);
@@ -40,6 +42,7 @@ public class ProductItemController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> updateProductItem(@PathVariable long id, @RequestBody ProductItemRequest request) {
         try {
             RespMessage respMessage = productItemService.updateProductItem(request, id);
@@ -54,6 +57,7 @@ public class ProductItemController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteProductItem(@PathVariable long id) {
         try {
             RespMessage respMessage = productItemService.deleteProductItem(id);
