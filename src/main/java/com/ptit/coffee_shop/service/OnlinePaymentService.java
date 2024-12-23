@@ -40,8 +40,11 @@ public class OnlinePaymentService {
     @Autowired
     private OrderRepository orderRepository;
 
-    @Value("${react.base-url}")
-    private String reactBaseUrl;
+    @Value("${frontend-url}")
+    private String frontEndUrl;
+
+    @Value("${backend-url}")
+    private String backEndUrl;
 
 
     public RespMessage createVNPayPayment(int amount, HttpServletRequest request) {
@@ -66,7 +69,7 @@ public class OnlinePaymentService {
         vnp_Params.put("vnp_OrderType", OnlinePaymentConfig.orderType);
         vnp_Params.put("vnp_Locale", "vn");
 
-        vnp_Params.put("vnp_ReturnUrl", OnlinePaymentConfig.vnp_ReturnUrl);
+        vnp_Params.put("vnp_ReturnUrl", backEndUrl + "/api/payment/return");
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -121,7 +124,7 @@ public class OnlinePaymentService {
         RedirectView redirectView = new RedirectView();
         String status = responseCode.equals("00") ? "success" : "fail";
 
-        String url = reactBaseUrl + "/order-status"
+        String url = frontEndUrl + "/order-status"
                 + "?status=" + status
                 + "&txnRef=" + request.getParameter("vnp_TxnRef");
 
