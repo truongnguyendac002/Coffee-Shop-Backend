@@ -81,6 +81,7 @@ public class ShippingAddressService {
         ShippingAddress shippingAddress = shippingAddressOptional.get();
         shippingAddress.setStatus(Status.INACTIVE);
         shippingAddressRepository.save(shippingAddress);
-        return messageBuilder.buildSuccessMessage("Delete shipping address (id: " + id + ") successfully");
+//        return messageBuilder.buildSuccessMessage("Delete shipping address (id: " + id + ") successfully");
+        return messageBuilder.buildSuccessMessage(shippingAddress.toResponse());
     }
 }
