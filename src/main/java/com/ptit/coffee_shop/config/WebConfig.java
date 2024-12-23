@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.config;
 
 import com.cloudinary.Cloudinary;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,9 @@ import java.util.Map;
 
 @Configuration
 public class WebConfig {
+    @Value("${frontend-url}")
+    private String frontEndUrl;
+
     @Bean("com.ptit.coffee_shop.config.messageSource")
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -39,7 +43,7 @@ public class WebConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("https://coffeeshoppro.online");
+        config.addAllowedOriginPattern(frontEndUrl);
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");

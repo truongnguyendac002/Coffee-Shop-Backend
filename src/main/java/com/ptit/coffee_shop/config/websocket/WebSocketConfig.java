@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.config.websocket;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -15,6 +16,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    @Value("${frontend-url}")
+    private String frontEndUrl;
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic"); // Nơi client lắng nghe
@@ -24,8 +27,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("https://coffeeshoppro.online")
-                .withSockJS(); // Endpoint WebSocket
+                .setAllowedOrigins(frontEndUrl)
+                .withSockJS();
     }
 
 
