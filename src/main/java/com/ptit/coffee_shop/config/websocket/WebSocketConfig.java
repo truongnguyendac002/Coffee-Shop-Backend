@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("https://coffeeshoppro.online", "https://www.coffeeshoppro.online")
+                .setAllowedOrigins("https://coffeeshoppro.online")
                 .withSockJS(); // Endpoint WebSocket
     }
 

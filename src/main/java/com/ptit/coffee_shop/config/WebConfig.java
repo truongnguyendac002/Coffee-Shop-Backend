@@ -35,29 +35,11 @@ public class WebConfig {
         return cloudinary;
     }
 
-//    @Bean
-//    public CorsFilter corsFilter() {
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.addAllowedOriginPattern("https://coffeeshoppro.online");
-//        config.addAllowedOriginPattern("https://www.coffeeshoppro.online");
-//        config.addAllowedMethod("GET");
-//        config.addAllowedMethod("POST");
-//        config.addAllowedMethod("PUT");
-//        config.addAllowedMethod("DELETE");
-//        config.addAllowedHeader("*");
-//        config.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//
-//        return new CorsFilter(source);
-//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOriginPattern("https://coffeeshoppro.online");
-        config.addAllowedOriginPattern("https://www.coffeeshoppro.online");
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");
