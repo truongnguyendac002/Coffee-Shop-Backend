@@ -139,6 +139,7 @@ public class OnlinePaymentService {
     public RespMessage handleVNPayRefund(long orderId, HttpServletRequest request) {
         try {
             String vnp_RequestId = OnlinePaymentConfig.getRandomNumber(8);
+//            Transaction transaction = transactionRepository.getOne(orderId);
             Optional<Transaction> transactionOptional = transactionRepository.findByOrderId(orderId);
             Transaction transaction = new Transaction();
             if( transactionOptional.isPresent() ) {
@@ -151,10 +152,10 @@ public class OnlinePaymentService {
 
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-            String vnp_TransactionDate = formatter.format(cld.getTime());
+            String vnp_TransactionDate = formatter.format(transaction.getPayDate());
             String vnp_CreateDate = formatter.format(transaction.getPayDate());
             String vnp_IpAddr = OnlinePaymentConfig.getIpAddress(request);
-            String vnp_Amount = String.valueOf((int) (transaction.getAmount()));
+            String vnp_Amount = String.valueOf((long) (transaction.getAmount()));
             String vnp_TransactionNo = transaction.getTransactionNo();
             String vnp_CreateBy = transaction.getOrder().getShippingAddress().getUser().getEmail();
             String vnp_OrderInfo = "Hoan tien GD OrderId:" + vnp_TxnRef;
