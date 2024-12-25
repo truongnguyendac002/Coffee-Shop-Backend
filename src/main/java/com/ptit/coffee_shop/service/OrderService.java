@@ -63,6 +63,7 @@ public class OrderService {
             for (OrderItem orderItem : orderItems) {
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
             }
+            totalPrice += 10000;
             orderResponse.setOrderItems(orderItemResponses);
             orderResponse.setTotal(totalPrice);
             orderResponses.add(orderResponse);
@@ -83,6 +84,7 @@ public class OrderService {
             for (OrderItem orderItem : orderItems) {
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
             }
+            totalPrice += 10000;
             orderResponse.setOrderItems(orderItemResponses);
             orderResponse.setTotal(totalPrice);
             orderResponse.setOrderStatus(order.getStatus().toString());
@@ -275,6 +277,7 @@ public class OrderService {
                 for (OrderItem orderItem : orderItems) {
                     totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
                 }
+                totalPrice += 10000;
                 orderResponse.setOrderItems(orderItemResponses);
                 orderResponse.setTotal(totalPrice);
                 orderResponses.add(orderResponse);

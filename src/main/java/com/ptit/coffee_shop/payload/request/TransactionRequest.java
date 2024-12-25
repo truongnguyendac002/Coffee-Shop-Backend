@@ -1,5 +1,6 @@
 package com.ptit.coffee_shop.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class TransactionRequest {
     @JsonProperty("TxnRef")
     private String txnRef;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty("PayDate")
     private Date payDate;
 
