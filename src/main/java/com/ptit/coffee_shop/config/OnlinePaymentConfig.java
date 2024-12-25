@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,7 +14,6 @@ import java.util.*;
 public class OnlinePaymentConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8080/api/payment/return";
     public static String vnp_TmnCode = "W431Y266";
     public static String secretKey = "X1PG8L1HUG4QXOIFFL81QXUATCO1XXCN";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
