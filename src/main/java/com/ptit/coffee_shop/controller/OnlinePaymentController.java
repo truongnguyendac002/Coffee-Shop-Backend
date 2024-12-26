@@ -52,7 +52,7 @@ public class OnlinePaymentController {
     }
 
     @RequestMapping(value = "",method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<String> handleVNPayRefund(@RequestParam long orderId, HttpServletRequest request) {
+    public ResponseEntity<String> handleVNPayRefund(@RequestParam("orderId") long orderId, HttpServletRequest request) {
         try {
             RespMessage respMessage = onlinePaymentService.handleVNPayRefund(orderId, request);
             return new ResponseEntity<>(GsonUtil.getInstance().toJson(respMessage), HttpStatus.OK);
