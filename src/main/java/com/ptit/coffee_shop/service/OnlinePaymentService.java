@@ -125,11 +125,11 @@ public class OnlinePaymentService {
         String status = responseCode.equals("00") ? "success" : "fail";
 
         String url = frontEndUrl + "/order-status"
-                + "?status=" + status
-                + "&txnRef=" + request.getParameter("vnp_TxnRef");
+                + "?status=" + status;
 
         if (responseCode.equals("00")) {
-            url += "&transactionNo=" + request.getParameter("vnp_TransactionNo")
+            url += "&txnRef=" + request.getParameter("vnp_TxnRef")
+                    + "&transactionNo=" + request.getParameter("vnp_TransactionNo")
                     + "&amount=" + request.getParameter("vnp_Amount")
                     + "&payDate=" + request.getParameter("vnp_PayDate");
         }
