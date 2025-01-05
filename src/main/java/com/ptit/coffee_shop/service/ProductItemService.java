@@ -70,11 +70,6 @@ public class ProductItemService {
         return messageBuilder.buildSuccessMessage(productItem);
     }
 
-//    public RespMessage getProductItem(Long productId) {
-//        List<ProductItem> productItems = productItemRepository.findByProductId(productId);
-//        List<ProductItem> activeProductItems = productItems.stream().filter(productItem -> productItem.getStatus() == Status.ACTIVE).toList();
-//        return messageBuilder.buildSuccessMessage(activeProductItems);
-//    }
 
     public RespMessage getProductItem(Long productId) {
         List<ProductItem> productItems = productItemRepository.findByProductId(productId);

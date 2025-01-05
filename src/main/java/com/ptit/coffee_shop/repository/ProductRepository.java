@@ -17,9 +17,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByCategoryId(Long categoryId);
 
-    @Query("SELECT MAX(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId")
+    @Query("SELECT MAX(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId AND pi.stock > 0 AND pi.status = 'ACTIVE'")
     Optional<Double> maxPrice(long productId);
 
-    @Query("SELECT MIN(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId")
+    @Query("SELECT MIN(pi.price) FROM ProductItem pi WHERE pi.product.id = :productId AND pi.stock > 0 AND pi.status = 'ACTIVE'")
     Optional<Double> minPrice(long productId);
 }

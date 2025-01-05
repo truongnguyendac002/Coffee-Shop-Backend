@@ -74,7 +74,8 @@ public class ReviewService {
 
     public RespMessage getReviewByProductId(long productId) {
         try {
-            List<Review> reviews = reviewRepository.findByProductId(productId);
+            List<Review> reviews = reviewRepository.findByProductId(productId)
+                    .stream().filter(review -> review.getStatus().equals(Status.ACTIVE)).toList();
             List<ReviewResponse> reviewResponses = reviews.stream().map(Review::toResponse).toList();
             return messageBuilder.buildSuccessMessage(reviewResponses);
         } catch (CoffeeShopException e) {
