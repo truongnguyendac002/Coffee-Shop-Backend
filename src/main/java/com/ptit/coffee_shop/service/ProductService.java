@@ -44,8 +44,12 @@ public class ProductService {
 
     public RespMessage getProductById(Long id) {
         Optional<Product> productOp = productRepository.findById(id);
+
         if (productOp.isPresent()) {
             Product product = productOp.get();
+            if (product.getStatus() == Status.INACTIVE) {
+                throw new CoffeeShopException(Constant.FIELD_NOT_VALID, new Object[]{"product"}, "Product not active");
+            }
             ProductResponse productResponse = getProductResponse(product);
             List<Image> images = imageRepository.findByProduct(product);
             productResponse.setImages(images);
@@ -56,7 +60,8 @@ public class ProductService {
     }
     public RespMessage getProductsByCategoryId(Long categoryId) {
         try {
-            List<Product> products = productRepository.findByCategoryId(categoryId);
+            List<Product> tempProducts = productRepository.findByCategoryId(categoryId);
+            List<Product> products = tempProducts.stream().filter(product -> product.getStatus() == Status.ACTIVE).toList();
             List<ProductResponse> productResponseList = new ArrayList<>();
             for (Product product : products) {
                 ProductResponse productResponse = getProductResponse(product);
@@ -72,7 +77,9 @@ public class ProductService {
     // Tìm kiếm sản phẩm theo từ khóa và trả về RespMessage
     public RespMessage searchProductsByKeyword(String keyword) {
         try {
-            List<Product> products = productRepository.searchByKeyword(keyword);
+            List<Product> products = productRepository
+                    .searchByKeyword(keyword)
+                    .stream().filter(product -> product.getStatus() == Status.ACTIVE).toList();
             if (products.isEmpty()) {
                 return messageBuilder.buildFailureMessage(Constant.FIELD_NOT_FOUND, null, null);
             }
@@ -120,37 +127,6 @@ public class ProductService {
         }
         return messageBuilder.buildSuccessMessage(getProductResponse(product));
     }
-
-    @Transactional
-    public RespMessage addCategory(String name, String description) {
-        if (name == null || name.isEmpty()) {
-            throw new CoffeeShopException(Constant.FIELD_NOT_NULL, new Object[]{"name"}, "Category name must be not null");
-        }
-        if (categoryRepository.findByName(name).isPresent()) {
-            throw new CoffeeShopException(Constant.FIELD_EXISTED, new Object[]{"name"}, "Category name is duplicate");
-        }
-
-        Category category = new Category();
-        category.setName(name);
-        if (description != null && !description.isEmpty()) {
-            category.setDescription(description);
-        }
-        try {
-            categoryRepository.save(category);
-        } catch (Exception e) {
-            throw new CoffeeShopException(Constant.SYSTEM_ERROR, new Object[]{e.getMessage()}, "Error when add category");
-        }
-
-        return messageBuilder.buildSuccessMessage(category);
-    }
-
-    @Transactional
-    public RespMessage getAllCategory() {
-        List<Category> categories = categoryRepository.findAll();
-        return messageBuilder.buildSuccessMessage(categories);
-    }
-
-
 
     @Transactional
     public RespMessage addBrand(String name) {
@@ -230,7 +206,8 @@ public class ProductService {
     }
 
     public RespMessage getAllTypeProduct() {
-        List<TypeProduct> typeProducts = typeProductRepository.findAll();
+        List<TypeProduct> typeProducts = typeProductRepository.findAll().stream()
+                .filter(typeProduct -> typeProduct.getStatus() == Status.ACTIVE).toList();
         return messageBuilder.buildSuccessMessage(typeProducts);
     }
 

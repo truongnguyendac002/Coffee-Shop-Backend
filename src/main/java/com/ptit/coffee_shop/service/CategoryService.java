@@ -23,13 +23,17 @@ public class CategoryService {
     final CloudinaryService cloudinaryService;
 
     public RespMessage getAllCategories() {
-        List<Category> categories = categoryRepository.findAllCategories();
+        List<Category> categories = categoryRepository.findAllCategories()
+                .stream().filter(category -> category.getStatus().equals(Status.ACTIVE)).toList();
         return messageBuilder.buildSuccessMessage(categories);
     }
 
     public RespMessage getCategoryById(long id) {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
+            if (category.get().getStatus().equals(Status.INACTIVE)) {
+                throw new CoffeeShopException(Constant.NOT_FOUND, null, "Category not active");
+            }
             return messageBuilder.buildSuccessMessage(category.get());
         } else {
             throw new CoffeeShopException(Constant.NOT_FOUND, null, "Category not found");

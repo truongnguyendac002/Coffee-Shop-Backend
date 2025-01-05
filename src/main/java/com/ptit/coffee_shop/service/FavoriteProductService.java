@@ -1,6 +1,7 @@
 package com.ptit.coffee_shop.service;
 
 import com.ptit.coffee_shop.common.Constant;
+import com.ptit.coffee_shop.common.enums.Status;
 import com.ptit.coffee_shop.config.MessageBuilder;
 import com.ptit.coffee_shop.exception.CoffeeShopException;
 import com.ptit.coffee_shop.model.FavoriteProduct;
@@ -40,10 +41,9 @@ public class FavoriteProductService {
 
         List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findByUserId(userId);
         List<FavoriteProductResponse> favoriteProductResponses = favoriteProducts.stream()
+                .filter(favoriteProduct -> favoriteProduct.getProduct().getStatus().equals(Status.ACTIVE))
                 .map(favoriteProduct -> {
                     ProductResponse productResponse =productService.getProductResponse(favoriteProduct.getProduct());
-
-
                     return new FavoriteProductResponse(
                             favoriteProduct.getId(),
                             productResponse,

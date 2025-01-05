@@ -23,7 +23,8 @@ public class BrandService {
     private final MessageBuilder messageBuilder;
 
     public RespMessage getAllBrands() {
-        List<Brand> brands = brandRepository.getAll();
+        List<Brand> brands = brandRepository.getAll()
+                .stream().filter(brand -> brand.getStatus().equals(Status.ACTIVE)).toList();
         return messageBuilder.buildSuccessMessage(brands);
     }
 
