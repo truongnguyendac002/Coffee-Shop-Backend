@@ -29,7 +29,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final MessageBuilder messageBuilder;
     @Transactional
-    public RespMessage updateMessage(ChatMessageRequest message, long conversationId) {
+    public RespMessage createMessage(ChatMessageRequest message, long conversationId) {
         ChatMessage chatMessage = new ChatMessage();
 
         Optional<Conversation> conversation = conversationRepository.findById(conversationId);

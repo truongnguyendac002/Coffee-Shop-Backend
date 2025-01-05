@@ -55,7 +55,7 @@ public class RestChatController {
 
     @RequestMapping(value = "/conversation/user/{id}", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> getConversationByUser
+    public ResponseEntity<String> getConversationByHostId
             (
                     @PathVariable("id") long id
             ) {

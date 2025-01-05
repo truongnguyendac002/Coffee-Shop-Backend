@@ -27,11 +27,11 @@ public class ChatSocketController {
     public final SimpMessageSendingOperations simpMessageSendingOperations;
     @MessageMapping("/chat/{conversationId}")
     @SendTo("/topic/conversation/{conversationId}")
-    public String sendMessage(
+    public String createMessage(
             @DestinationVariable long conversationId,
             ChatMessageRequest message) {
         try {
-            RespMessage conversationResponse = chatService.updateMessage(message, conversationId);
+            RespMessage conversationResponse = chatService.createMessage(message, conversationId);
             String response = GsonUtil.getInstance().toJson(conversationResponse);
             simpMessageSendingOperations.convertAndSend("/topic/admin" , response);
             return response;
