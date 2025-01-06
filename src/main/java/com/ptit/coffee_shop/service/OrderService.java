@@ -42,7 +42,7 @@ public class OrderService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private ReviewRepository reviewRepository;
+    private ImageRepository imageRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -58,7 +58,7 @@ public class OrderService {
             orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
             orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
-            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(this::toOrderItemResponse).toList();
             double totalPrice = 0;
             for (OrderItem orderItem : orderItems) {
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
@@ -79,7 +79,7 @@ public class OrderService {
             OrderResponse orderResponse = new OrderResponse();
             orderResponse.setOrderId(order.getId());
             orderResponse.setOrderDate(order.getOrderDate());
-            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(this::toOrderItemResponse).toList();
             double totalPrice = 0;
             for (OrderItem orderItem : orderItems) {
                 totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
@@ -231,20 +231,7 @@ public class OrderService {
         List<OrderResponse> orderResponses = new ArrayList<>();
         for (Order order : orders) {
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
-//            List<OrderItemResponse> orderItemResponses =
-//                orderItems.stream().map(orderItem -> {
-//                    OrderItemResponse orderItemResponse = new OrderItemResponse();
-//                    orderItemResponse.setId(orderItem.getId());
-//                    orderItemResponse.setAmount(orderItem.getAmount());
-//                    orderItemResponse.setPrice(orderItem.getPrice());
-//                    orderItemResponse.setDiscount(orderItem.getDiscount());
-//                    orderItemResponse.setProductItem(orderItem.getProductItem());
-//                    return orderItemResponse;
-//                }).toList();
-
-//            List<Review> reviews = reviewRepository.findByOrderId(order.getId());
-            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
-
+            List<OrderItemResponse> orderItemResponses = orderItems.stream().map(this::toOrderItemResponse).toList();
             OrderResponse orderResponse = new OrderResponse();
             orderResponse.setOrderId(order.getId());
             orderResponse.setOrderDate(order.getOrderDate());
@@ -252,8 +239,6 @@ public class OrderService {
             orderResponse.setOrderStatus(order.getStatus().toString());
             orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
             orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
-//            orderResponse.setListReview(reviews);
-
             orderResponses.add(orderResponse);
         }
 
@@ -272,7 +257,7 @@ public class OrderService {
                 orderResponse.setPaymentMethod(order.getPaymentMethod().toString());
                 orderResponse.setShippingAddress(order.getShippingAddress().toResponse());
                 List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
-                List<OrderItemResponse> orderItemResponses = orderItems.stream().map(OrderItem::toResponse).toList();
+                List<OrderItemResponse> orderItemResponses = orderItems.stream().map(this::toOrderItemResponse).toList();
                 double totalPrice = 0;
                 for (OrderItem orderItem : orderItems) {
                     totalPrice += (orderItem.getPrice() - orderItem.getDiscount())*orderItem.getAmount();
@@ -286,5 +271,21 @@ public class OrderService {
         } catch (CoffeeShopException e) {
             throw new CoffeeShopException(Constant.UNDEFINED, null, "Order not found");
         }
+    }
+
+    public OrderItemResponse toOrderItemResponse(OrderItem orderItem) {
+        List<Image> productImages = imageRepository.findByProduct(orderItem.getProductItem().getProduct());
+        return OrderItemResponse.builder()
+                .orderItemId(orderItem.getId())
+                .productItemId(orderItem.getProductItem().getId())
+                .productId(orderItem.getProductItem().getProduct().getId())
+                .productName(orderItem.getProductItem().getProduct().getName())
+                .productType(orderItem.getProductItem().getType().getName())
+                .amount(orderItem.getAmount())
+                .price(orderItem.getPrice())
+                .discount(orderItem.getDiscount())
+                .isReviewed(orderItem.isReviewed())
+                .productImage(productImages.get(0).getUrl())
+                .build();
     }
 }
