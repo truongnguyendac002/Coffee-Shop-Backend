@@ -41,20 +41,6 @@ public class OrderItem {
     @Column(name = "is_reviewed")
     private boolean isReviewed;
 
-    public OrderItemResponse toResponse() {
-        return OrderItemResponse.builder()
-                .orderItemId(id)
-                .productItemId(productItem.getId())
-                .productId(productItem.getProduct().getId())
-                .productName(productItem.getProduct().getName())
-                .productType(productItem.getType().getName())
-                .amount(amount)
-                .price(price)
-                .discount(discount)
-                .isReviewed(isReviewed)
-                .build();
-    }
-
     @PrePersist
     public void prePersist() {
         isReviewed = false;
