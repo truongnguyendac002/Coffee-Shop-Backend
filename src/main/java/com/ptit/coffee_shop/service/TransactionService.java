@@ -13,12 +13,14 @@ import com.ptit.coffee_shop.repository.TransactionRepository;
 import com.ptit.coffee_shop.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
@@ -26,6 +28,7 @@ public class TransactionService {
     private final MessageBuilder messageBuilder;
 
     public RespMessage addTransaction(TransactionRequest transactionRequest) {
+        log.info("transactionRequest date" + transactionRequest.getPayDate());
         Optional<Order> orderOptional = orderRepository.findById(transactionRequest.getOrderId());
         if (orderOptional.isPresent()) {
             Transaction transaction = new Transaction();
