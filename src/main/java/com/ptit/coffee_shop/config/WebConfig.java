@@ -20,6 +20,9 @@ public class WebConfig {
     @Value("${frontend-url}")
     private String frontEndUrl;
 
+    @Value("${vnpay-url}")
+    private String vnpayUrl;
+
     @Bean("com.ptit.coffee_shop.config.messageSource")
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -44,6 +47,7 @@ public class WebConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOriginPattern(frontEndUrl);
+        config.addAllowedOriginPattern(vnpayUrl);
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
         config.addAllowedMethod("PUT");
