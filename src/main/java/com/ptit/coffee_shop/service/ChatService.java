@@ -87,7 +87,7 @@ public class ChatService {
 
 
     public RespMessage getAllConversation() {
-        List<Conversation> allConversation = conversationRepository.findAll();
+        List<Conversation> allConversation = conversationRepository.findByUserIsActive();
         List<ConversationResponse> conversationResponseList = new ArrayList<>();
         for (Conversation conversation : allConversation) {
             ConversationResponse response = getConversationResponse(conversation);
